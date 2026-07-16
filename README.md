@@ -1,59 +1,61 @@
-# Robust Physical Adversarial Patch Attack for YOLOv8
+# Robust Adversarial Patch Attack for YOLOv8
 
 ## Overview
 
-This repository contains a research-oriented implementation of a robust physical adversarial patch attack against YOLOv8 using Expectation over Transformation (EOT).
+This repository implements a modular framework for developing robust adversarial patch attacks against YOLOv8.
 
-The project is being developed as part of a capstone project and follows a modular software architecture for reproducibility, maintainability, and future research extensions.
+The project is being developed incrementally, with each milestone introducing a new component of the attack pipeline.
 
 ---
 
-## Project Stages
+## Current Pipeline
 
-### Stage A
-Digital adversarial patch optimization.
+```
+Configuration
+        ↓
+Dataset Loader
+        ↓
+Adversarial Patch
+        ↓
+Patch Applier
+        ↓
+YOLOv8 Detector
+        ↓
+Detection Parser
+        ↓
+Loss Functions
+```
 
-### Stage B
-Physical-world deployment and evaluation.
+---
 
-### Stage C
-Defense against adversarial patches.
+## Current Status
 
-### Stage D
-Comprehensive evaluation and robustness analysis.
+### ✅ Completed
+
+- Configuration Management
+- Dataset Loader
+- Adversarial Patch
+- Patch Applier
+- YOLO Detector Wrapper
+- Detection Parser
+- Loss Functions
+- Stage A Baseline Experiment
+
+### 🚧 In Progress
+
+- Differentiable Optimization Loop
+- Expectation over Transformation (EOT)
+- Trainer
+- Evaluation
 
 ---
 
 ## Repository Structure
 
-```text
+```
 attack/
-defense/
-evaluation/
-physical/
+experiments/
 data/
 outputs/
-docs/
+tests/
 ```
-
----
-
-## Current Progress
-
-- ✅ Repository initialization
-- ✅ Configuration management
-- ✅ Utility module
-- ⏳ Adversarial Patch module
-- ⏳ Dataset loader
-- ⏳ Detector wrapper
-- ⏳ Loss functions
-- ⏳ EOT engine
-- ⏳ Trainer
-- ⏳ Evaluation
-
----
-
-## Author
-
-Rishab Shetty
-PES University

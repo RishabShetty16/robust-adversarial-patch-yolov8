@@ -331,3 +331,33 @@ Verified:
 Status
 
 ✅ Completed
+
+# Commit 9
+
+## Stage A Baseline Experiment
+
+### Objective
+
+Create the first executable experiment connecting all completed modules.
+
+### Implemented
+
+- Configuration loading
+- Dataset loading
+- Patch creation
+- Optimizer creation
+- Patch application
+- Patched image visualization
+- YOLO detection
+- Detection parsing
+- Confidence statistics
+
+### Outputs
+
+- Patched image
+- Detection list
+- Confidence summary
+
+### Status
+
+✅ Completed

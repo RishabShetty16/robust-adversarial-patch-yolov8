@@ -27,24 +27,45 @@ patch:
   clamp_max: 1.0
 
 optimizer:
-  name: AdamW
+  type: Adam
   lr: 0.03
-  weight_decay: 0.0001
+  weight_decay: 0.0
   iterations: 1000
   grad_clip: 5.0
+
+  scheduler:
+    type: cosine
+    T_max: 1000
+    eta_min: 0.0001
 
 attack:
   mode: suppression
   target_class: person
 
-eot:
-  enabled: true
-
-logging:
-  save_every: 100
-  evaluate_every: 50
-
 placement:
   mode: fixed
   x: 100
   y: 100
+
+eot:
+  enabled: true
+  probability: 1.0
+
+  rotation:
+    degrees: 10
+
+  scale:
+    min: 0.90
+    max: 1.10
+
+  brightness:
+    min: 0.90
+    max: 1.10
+
+  contrast:
+    min: 0.90
+    max: 1.10
+
+logging:
+  save_every: 100
+  evaluate_every: 50

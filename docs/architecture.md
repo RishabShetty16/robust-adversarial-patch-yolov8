@@ -1,42 +1,32 @@
 # Project Architecture
 
 ## Stage A Pipeline
+Configuration
+        │
+        ▼
 Dataset
-      │
-      ▼
+        │
+        ▼
+Image
+        │
+        ▼
 Patch
-      │
-      ▼
+        │
+        ▼
 Patch Applier
-      │
-      ▼
+        │
+        ▼
+Patched Image
+        │
+        ▼
 YOLO Detector
-      │
-      ▼
+        │
+        ▼
 Detection Parser
-      │
-      ▼
-Loss Functions
-      │
-      ▼
-Trainer
+        │
+        ▼
+Confidence Statistics
 
-Patch
-   │
-   ▼
-Detector
-   │
-   ▼
-Parser
-   │
-   ▼
-Loss Manager
-   │
-   ├── Confidence Loss
-   ├── Objectness Loss
-   ├── TV Loss
-   └── NPS Loss
-   
 ## High-Level Design
 
 ```

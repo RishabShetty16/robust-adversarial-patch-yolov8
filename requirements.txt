@@ -1,0 +1,25 @@
+# Deep Learning
+torch>=2.7.1
+torchvision>=0.22.1
+
+# Object Detection
+ultralytics>=8.3
+
+# Image Processing
+opencv-python>=4.10
+Pillow>=10.0
+
+# Differentiable Image Augmentations
+kornia>=0.8
+
+# Numerical Computing
+numpy>=2.2
+
+# Configuration
+PyYAML>=6.0
+
+# Visualization
+matplotlib>=3.10
+
+# Progress Bars
+tqdm>=4.67
