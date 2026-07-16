@@ -297,3 +297,37 @@ Verified:
 Status
 
 ✅ Completed
+
+---
+
+# Commit 8
+
+## Individual Loss Functions
+
+### Objective
+
+Implement differentiable loss functions for adversarial patch optimization.
+
+### Implemented
+
+- Confidence loss
+- Objectness loss
+- Total Variation (TV) loss
+- NPS placeholder
+
+### Files
+
+- attack/losses.py
+
+### Testing
+
+Verified:
+
+- Confidence loss
+- Objectness loss
+- TV loss
+- Gradient compatibility
+
+Status
+
+✅ Completed

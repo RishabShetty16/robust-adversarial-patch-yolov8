@@ -1,30 +1,42 @@
 # Project Architecture
 
 ## Stage A Pipeline
-
-COCO Dataset
+Dataset
       │
       ▼
-Dataset Loader
+Patch
       │
       ▼
 Patch Applier
       │
       ▼
-Patched Image
+YOLO Detector
       │
       ▼
-YOLO Detector
+Detection Parser
       │
       ▼
 Loss Functions
       │
       ▼
-Optimizer
-      │
-      ▼
-Patch Update
+Trainer
 
+Patch
+   │
+   ▼
+Detector
+   │
+   ▼
+Parser
+   │
+   ▼
+Loss Manager
+   │
+   ├── Confidence Loss
+   ├── Objectness Loss
+   ├── TV Loss
+   └── NPS Loss
+   
 ## High-Level Design
 
 ```
