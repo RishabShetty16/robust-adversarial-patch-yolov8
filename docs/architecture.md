@@ -2,7 +2,6 @@
 
 ## Stage A Pipeline
 
-```text
 COCO Dataset
       │
       ▼
@@ -12,7 +11,7 @@ Dataset Loader
 Patch Applier
       │
       ▼
-EOT Transformations
+Patched Image
       │
       ▼
 YOLO Detector
@@ -24,8 +23,7 @@ Loss Functions
 Optimizer
       │
       ▼
-Update Patch
-```
+Patch Update
 
 ## High-Level Design
 

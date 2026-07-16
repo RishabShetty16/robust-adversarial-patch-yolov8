@@ -227,3 +227,37 @@ Verified:
 Status
 
 ✅ Completed
+
+---
+
+# Commit 6
+
+## Patch Applier Module
+
+### Objective
+
+Implement a reusable module that applies adversarial patches to images.
+
+### Implemented
+
+- Apply patch to one image
+- Apply patch to image batches
+- Automatic boundary handling
+- Pixel value clamping
+
+### Files
+
+- attack/patch_applier.py
+
+### Testing
+
+Verified:
+
+- Single-image patch application
+- Batch patch application
+- Output tensor shape
+- Pixel value range
+
+Status
+
+✅ Completed

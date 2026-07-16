@@ -109,29 +109,3 @@ class COCODataset(Dataset):
 # ==========================================================
 # Test
 # ==========================================================
-
-if __name__ == "__main__":
-
-    from attack.config import load_config
-
-    cfg = load_config("attack/configs/default.yaml")
-
-    dataset = COCODataset(cfg)
-
-    print(dataset)
-
-    if len(dataset) > 0:
-
-        image = dataset[0]
-
-        print()
-
-        print("Image Shape :", image.shape)
-        print("Min         :", image.min())
-        print("Max         :", image.max())
-
-    else:
-
-        print()
-
-        print("No images found.")

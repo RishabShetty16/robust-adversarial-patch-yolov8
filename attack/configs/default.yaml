@@ -40,3 +40,8 @@ eot:
 logging:
   save_every: 100
   evaluate_every: 50
+
+placement:
+  mode: fixed
+  x: 100
+  y: 100
