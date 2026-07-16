@@ -16,6 +16,9 @@ dataset:
 
 model:
   weights: yolov8n.pt
+  device: auto
+  confidence: 0.25
+  iou: 0.45
 
 patch:
   size: 160

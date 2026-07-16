@@ -261,3 +261,39 @@ Verified:
 Status
 
 ✅ Completed
+
+---
+
+# Commit 7
+
+## YOLO Detector Wrapper & Detection Parser
+
+### Objective
+
+Build a detector interface independent of Ultralytics internals.
+
+### Implemented
+
+- YOLO model wrapper
+- Automatic model loading
+- Configurable confidence threshold
+- Configurable IoU threshold
+- Detection parser
+- Standardized detection dictionaries
+
+### Files
+
+- attack/detector.py
+- attack/parser.py
+
+### Testing
+
+Verified:
+
+- YOLO loads correctly
+- Inference executes successfully
+- Detections parsed correctly
+
+Status
+
+✅ Completed
