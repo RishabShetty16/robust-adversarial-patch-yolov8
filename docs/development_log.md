@@ -188,3 +188,42 @@ Successfully verified:
 ### Status
 
 ✅ Completed
+
+---
+
+---
+
+# Commit 5
+
+## COCO Dataset Module
+
+### Objective
+
+Build a reusable dataset loader for adversarial patch training.
+
+### Implemented
+
+- COCO dataset loader
+- Automatic image discovery
+- Image preprocessing
+- Resize transformation
+- Tensor conversion
+- Configuration-driven paths
+
+### Files
+
+- attack/dataset.py
+- test_dataset.py
+
+### Testing
+
+Verified:
+
+- Dataset initialization
+- Image loading
+- Tensor conversion
+- Correct tensor shape
+
+Status
+
+✅ Completed

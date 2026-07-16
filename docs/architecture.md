@@ -1,5 +1,32 @@
 # Project Architecture
 
+## Stage A Pipeline
+
+```text
+COCO Dataset
+      │
+      ▼
+Dataset Loader
+      │
+      ▼
+Patch Applier
+      │
+      ▼
+EOT Transformations
+      │
+      ▼
+YOLO Detector
+      │
+      ▼
+Loss Functions
+      │
+      ▼
+Optimizer
+      │
+      ▼
+Update Patch
+```
+
 ## High-Level Design
 
 ```
