@@ -1,0 +1,38 @@
+experiment:
+  name: baseline_patch_attack
+
+seed: 42
+
+device: auto
+
+dataset:
+  root: data/
+  image_size: 640
+  batch_size: 8
+
+model:
+  weights: yolov8n.pt
+
+patch:
+  size: 160
+  initialization: gray
+  clamp_min: 0.0
+  clamp_max: 1.0
+
+optimizer:
+  name: AdamW
+  lr: 0.03
+  weight_decay: 0.0001
+  iterations: 1000
+  grad_clip: 5.0
+
+attack:
+  mode: suppression
+  target_class: person
+
+eot:
+  enabled: true
+
+logging:
+  save_every: 100
+  evaluate_every: 50
