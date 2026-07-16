@@ -131,3 +131,60 @@ cpu
 ## Status
 
 ✅ Tested successfully.
+
+# Commit 3
+
+## Utility Module
+
+### Implemented
+
+- Random seed initialization
+- Output directory creation
+- Timestamp generation
+- Model parameter counting
+
+Files
+
+- attack/utils.py
+
+Status
+
+✅ Tested
+
+---
+
+# Commit 4
+
+## Adversarial Patch Module
+
+### Objective
+
+Implement a reusable adversarial patch module that encapsulates all patch-related functionality.
+
+### Implemented
+
+- Learnable adversarial patch (`nn.Module`)
+- Gray initialization
+- Random initialization
+- Checkerboard initialization
+- Pixel clamping
+- Patch statistics
+- Patch save/load
+- Patch visualization
+
+### Files
+
+- attack/patch.py
+
+### Testing
+
+Successfully verified:
+
+- Patch initialization
+- Statistics computation
+- Patch saving
+- Patch visualization
+
+### Status
+
+✅ Completed
