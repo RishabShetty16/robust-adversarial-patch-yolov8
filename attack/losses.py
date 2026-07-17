@@ -5,10 +5,11 @@ Loss functions for adversarial patch optimization.
 
 Responsibilities
 ----------------
+- Baseline optimization loss
 - Confidence loss
 - Objectness loss
-- Total Variation loss
-- NPS placeholder
+- Total Variation (TV) loss
+- Non-Printability Score (NPS) placeholder
 
 Author:
     Rishab Shetty
@@ -17,7 +18,25 @@ Author:
 from __future__ import annotations
 
 import torch
-import torch.nn.functional as F
+
+
+# ==========================================================
+# Baseline Optimization Loss
+# ==========================================================
+
+def baseline_loss(predictions: torch.Tensor) -> torch.Tensor:
+    """
+    Temporary differentiable loss used to verify the
+    optimization pipeline.
+
+    NOTE
+    ----
+    This is NOT the final adversarial objective.
+    It will be replaced with a detector-specific
+    person suppression loss in a later stage.
+    """
+
+    return predictions.mean()
 
 
 # ==========================================================
@@ -32,7 +51,11 @@ def confidence_loss(confidences: torch.Tensor) -> torch.Tensor:
     """
 
     if confidences.numel() == 0:
-        return torch.tensor(0.0, requires_grad=True)
+        return torch.tensor(
+            0.0,
+            device=confidences.device,
+            requires_grad=True,
+        )
 
     return confidences.mean()
 
@@ -47,7 +70,11 @@ def objectness_loss(objectness: torch.Tensor) -> torch.Tensor:
     """
 
     if objectness.numel() == 0:
-        return torch.tensor(0.0, requires_grad=True)
+        return torch.tensor(
+            0.0,
+            device=objectness.device,
+            requires_grad=True,
+        )
 
     return objectness.mean()
 
@@ -58,7 +85,7 @@ def objectness_loss(objectness: torch.Tensor) -> torch.Tensor:
 
 def total_variation_loss(patch: torch.Tensor) -> torch.Tensor:
     """
-    Encourage smooth patches.
+    Encourage smooth adversarial patches.
     """
 
     tv_h = torch.abs(
@@ -78,10 +105,10 @@ def total_variation_loss(patch: torch.Tensor) -> torch.Tensor:
 
 def non_printability_score(patch: torch.Tensor) -> torch.Tensor:
     """
-    Placeholder.
+    Placeholder for the Non-Printability Score (NPS).
 
-    Will be implemented during the
-    physical attack stage.
+    This regularization term will be implemented
+    during the physical adversarial attack stage.
     """
 
     return torch.tensor(
@@ -96,12 +123,19 @@ def non_printability_score(patch: torch.Tensor) -> torch.Tensor:
 
 if __name__ == "__main__":
 
-    conf = torch.tensor(
+    predictions = torch.randn(
+        1,
+        84,
+        8400,
+        requires_grad=True,
+    )
+
+    confidences = torch.tensor(
         [0.91, 0.84, 0.63],
         requires_grad=True,
     )
 
-    obj = torch.tensor(
+    objectness = torch.tensor(
         [0.93, 0.82],
         requires_grad=True,
     )
@@ -114,19 +148,22 @@ if __name__ == "__main__":
     )
 
     print("=" * 60)
-
     print("Testing Loss Functions")
-
     print("=" * 60)
 
     print(
+        "Baseline Loss :",
+        baseline_loss(predictions).item(),
+    )
+
+    print(
         "Confidence Loss :",
-        confidence_loss(conf).item(),
+        confidence_loss(confidences).item(),
     )
 
     print(
         "Objectness Loss :",
-        objectness_loss(obj).item(),
+        objectness_loss(objectness).item(),
     )
 
     print(

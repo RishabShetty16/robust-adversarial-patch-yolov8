@@ -361,3 +361,109 @@ Create the first executable experiment connecting all completed modules.
 ### Status
 
 ✅ Completed
+
+---
+
+# Commit 10
+
+## Differentiable Adversarial Patch Optimization Pipeline
+
+### Commit Message
+
+```text
+Implement differentiable adversarial patch optimization pipeline
+```
+
+### Objective
+
+Transform the baseline inference pipeline into a fully differentiable optimization framework capable of updating the adversarial patch using gradient descent.
+
+### Implemented
+
+- Implemented differentiable YOLO forward pass
+- Added Attack Target abstraction
+- Integrated baseline optimization loss
+- Built end-to-end computational graph
+- Enabled gradient propagation from detector to adversarial patch
+- Integrated optimizer update
+- Verified gradient flow through the complete pipeline
+
+### Files
+
+- attack/trainer.py
+- attack/attack_target.py
+- attack/losses.py
+- attack/detector.py
+- experiments/stage_a_train.py
+
+### Training Pipeline
+
+```
+Image
+   │
+   ▼
+Adversarial Patch
+   │
+   ▼
+Patch Applier
+   │
+   ▼
+Patched Image
+   │
+   ▼
+YOLO Forward Pass
+   │
+   ▼
+Attack Target
+   │
+   ▼
+Baseline Loss
+   │
+   ▼
+Backpropagation
+   │
+   ▼
+Optimizer
+   │
+   ▼
+Updated Patch
+```
+
+### Testing
+
+Verified:
+
+- Differentiable forward pass
+- Loss computation
+- Backpropagation
+- Optimizer update
+- Gradient propagation to the adversarial patch
+
+Example Output
+
+```
+============================================================
+Patch Trainer
+============================================================
+
+Forward Pass Successful
+
+Prediction Shape :
+torch.Size([1, 84, 8400])
+
+Loss :
+9.64319896697998
+
+Gradient Exists :
+True
+
+Gradient Shape :
+torch.Size([3, 160, 160])
+
+Optimizer Step Completed
+============================================================
+```
+
+### Status
+
+✅ Completed

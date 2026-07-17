@@ -86,6 +86,20 @@ class YOLODetector:
             f"YOLODetector("
             f"weights='{self.weights}')"
         )
+    
+    # -----------------------------------------------------
+    # Forward (Training)
+    # -----------------------------------------------------
+
+    def forward(self, image):
+        """
+        Forward pass for training.
+
+        Returns raw detector outputs without using predict().
+        """
+        outputs = self.model.model(image)
+
+        return outputs
 
 
 # ==========================================================
