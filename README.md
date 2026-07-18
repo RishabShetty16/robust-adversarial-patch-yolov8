@@ -11,37 +11,46 @@ The long-term objective is to generate physically robust adversarial patches cap
 ---
 
 # Current Pipeline
-Configuration
-        │
-        ▼
-Dataset + DataLoader
-        │
-        ▼
-Adversarial Patch
-        │
-        ▼
-Patch Application
-        │
-        ▼
-YOLO Detector
-        │
-        ▼
-Attack Target
-        │
-        ▼
-Baseline Loss
-        │
-        ▼
-Backpropagation
-        │
-        ▼
-Optimizer
-        │
-        ▼
-Updated Patch
-        │
-        ▼
-Checkpoint + Logs
+---
+
+```
+                     Configuration
+                           │
+                           ▼
+                 COCO Dataset Loader
+                           │
+                           ▼
+                    PyTorch DataLoader
+                           │
+                           ▼
+                  Adversarial Patch
+                           │
+                           ▼
+                    Patch Applier
+                           │
+                           ▼
+                      YOLO Detector
+                           │
+                           ▼
+                    Attack Target
+                           │
+                           ▼
+                     Baseline Loss
+                           │
+                           ▼
+                     Backpropagation
+                           │
+                           ▼
+                       Optimizer
+                           │
+                           ▼
+                    Updated Patch
+                           │
+              ┌────────────┴────────────┐
+              ▼                         ▼
+      Checkpoint Saving          Training Logs
+```
+
 ---
 
 ## Current Progress
@@ -114,19 +123,46 @@ outputs/
 
 # Current Milestone
 
-- **Commit 11**
-  - Multi-Epoch Training Framework
-  - DataLoader
-  - Logging
-  - Checkpoint Saving
+## Commit 12: Detector-Aware Suppression Loss
 
----
+### Objective
+
+Implemented a detector-aware optimization objective for adversarial patch training.
+
+### Changes
+
+- Added `AttackTarget` module to extract target class confidence scores from YOLOv8 predictions.
+- Implemented `person_suppression_loss()` to minimize person detection confidence.
+- Replaced the placeholder baseline loss with detector-aware suppression loss.
+- Added confidence statistics during training:
+  - Mean Target Confidence
+  - Maximum Target Confidence
+  - Minimum Target Confidence
+- Added gradient flow verification.
+- Added patch clamping after each optimizer step to keep pixel values within the valid image range `[0,1]`.
+- Added checkpoint saving and loss history logging.
+
+### Training Status
+
+Current pipeline:
+
+Input Image
+↓
+Adversarial Patch
+↓
+Patch Application
+↓
+YOLOv8 Detector
+↓
+Target Score Extraction
+↓
+Suppression Loss
+↓
+Backpropagation
+↓
+Patch Update
 
 # Future Milestones
-
-- **Commit 12**
-  - Detector-specific Person Suppression Loss
-  - First True Adversarial Optimization
 
 - **Commit 13**
   - Expectation over Transformation (EOT)

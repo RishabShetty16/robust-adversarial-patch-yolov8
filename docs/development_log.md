@@ -506,3 +506,40 @@ The successful decrease confirms that gradients propagate correctly from the det
 ### Next
 
 Implement a detector-specific adversarial objective (person suppression loss) to replace the baseline optimization loss.
+
+# Commit 12
+
+## Goal
+
+Replace the placeholder optimization objective with a detector-aware suppression loss.
+
+## Completed
+
+✓ Implemented AttackTarget for parsing YOLO outputs.
+
+✓ Added person_suppression_loss().
+
+✓ Integrated detector-aware loss into the trainer.
+
+✓ Added target confidence statistics.
+
+✓ Verified gradient flow.
+
+✓ Added patch clamping after every optimizer step.
+
+✓ Added checkpoint saving.
+
+✓ Added loss history logging.
+
+## Validation
+
+- Detector outputs successfully parsed.
+- Target confidence extracted correctly.
+- Loss decreases during training.
+- Patch updates successfully.
+- Patch values remain within [0,1].
+- Training completes successfully.
+
+## Status
+
+Stable training pipeline achieved.

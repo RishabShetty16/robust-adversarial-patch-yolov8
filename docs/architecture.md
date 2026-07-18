@@ -281,6 +281,33 @@ The repository is designed to be:
 - Gradient Verification
 
 ---
+# Commit 12 – Detector-Aware Optimization
+
+The optimization objective now directly depends on YOLOv8 predictions instead of a placeholder loss.
+
+Pipeline:
+
+Image
+↓
+PatchApplier
+↓
+Patched Image
+↓
+YOLOv8 Forward Pass
+↓
+AttackTarget
+↓
+Target Class Scores
+↓
+Person Suppression Loss
+↓
+Gradient Computation
+↓
+Adam Optimizer
+↓
+Updated Patch
+
+The patch is clamped after every optimization step to ensure pixel values remain within the valid image range [0,1].
 
 ## 🚧 Next Stage
 

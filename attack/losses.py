@@ -6,6 +6,7 @@ Loss functions for adversarial patch optimization.
 Responsibilities
 ----------------
 - Baseline optimization loss
+- Person suppression loss
 - Confidence loss
 - Objectness loss
 - Total Variation (TV) loss
@@ -32,11 +33,42 @@ def baseline_loss(predictions: torch.Tensor) -> torch.Tensor:
     NOTE
     ----
     This is NOT the final adversarial objective.
-    It will be replaced with a detector-specific
-    person suppression loss in a later stage.
     """
 
     return predictions.mean()
+
+
+# ==========================================================
+# Person Suppression Loss
+# ==========================================================
+
+def person_suppression_loss(
+    person_scores: torch.Tensor,
+) -> torch.Tensor:
+    """
+    Suppress detections of the target class.
+
+    Parameters
+    ----------
+    person_scores : Tensor
+        Shape (B, N)
+
+    Returns
+    -------
+    torch.Tensor
+        Mean confidence of all person predictions.
+
+    Lower is better.
+    """
+
+    if person_scores.numel() == 0:
+        return torch.tensor(
+            0.0,
+            device=person_scores.device,
+            requires_grad=True,
+        )
+
+    return person_scores.mean()
 
 
 # ==========================================================
@@ -46,8 +78,6 @@ def baseline_loss(predictions: torch.Tensor) -> torch.Tensor:
 def confidence_loss(confidences: torch.Tensor) -> torch.Tensor:
     """
     Reduce detector confidence.
-
-    Lower confidence = better attack.
     """
 
     if confidences.numel() == 0:
@@ -67,6 +97,9 @@ def confidence_loss(confidences: torch.Tensor) -> torch.Tensor:
 def objectness_loss(objectness: torch.Tensor) -> torch.Tensor:
     """
     Reduce objectness score.
+
+    Placeholder for detectors that expose
+    an explicit objectness output.
     """
 
     if objectness.numel() == 0:
@@ -83,7 +116,9 @@ def objectness_loss(objectness: torch.Tensor) -> torch.Tensor:
 # Total Variation Loss
 # ==========================================================
 
-def total_variation_loss(patch: torch.Tensor) -> torch.Tensor:
+def total_variation_loss(
+    patch: torch.Tensor,
+) -> torch.Tensor:
     """
     Encourage smooth adversarial patches.
     """
@@ -103,12 +138,12 @@ def total_variation_loss(patch: torch.Tensor) -> torch.Tensor:
 # Non-Printability Score
 # ==========================================================
 
-def non_printability_score(patch: torch.Tensor) -> torch.Tensor:
+def non_printability_score(
+    patch: torch.Tensor,
+) -> torch.Tensor:
     """
-    Placeholder for the Non-Printability Score (NPS).
-
-    This regularization term will be implemented
-    during the physical adversarial attack stage.
+    Placeholder for the Non-Printability
+    Score (NPS).
     """
 
     return torch.tensor(
@@ -126,6 +161,12 @@ if __name__ == "__main__":
     predictions = torch.randn(
         1,
         84,
+        8400,
+        requires_grad=True,
+    )
+
+    person_scores = torch.rand(
+        1,
         8400,
         requires_grad=True,
     )
@@ -154,6 +195,11 @@ if __name__ == "__main__":
     print(
         "Baseline Loss :",
         baseline_loss(predictions).item(),
+    )
+
+    print(
+        "Person Suppression Loss :",
+        person_suppression_loss(person_scores).item(),
     )
 
     print(

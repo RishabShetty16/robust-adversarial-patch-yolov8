@@ -25,7 +25,7 @@ import torch
 
 from torch.utils.data import DataLoader
 
-from attack.losses import baseline_loss
+from attack.losses import person_suppression_loss
 from attack.attack_target import AttackTarget
 
 
@@ -167,17 +167,37 @@ class PatchTrainer:
 
         targets = self.attack_target.extract(outputs)
 
-        predictions = targets["predictions"]
+        target_scores = targets["target_scores"]
 
-        print("Prediction Shape :", predictions.shape)
+        print("Target Scores Shape :", target_scores.shape)
+
+        # Sanity check
+        assert target_scores.ndim == 2, (
+            f"Expected target_scores shape (B, N), "
+            f"got {target_scores.shape}"
+        )
 
         # -------------------------------------------------
 
-        loss = baseline_loss(predictions)
+        loss = person_suppression_loss(target_scores)
 
         print()
-        print("Loss :", loss.item())
+        print("Person Suppression Loss :", loss.item())
 
+        print()
+        print(
+            f"Mean Target Confidence : {target_scores.mean().item():.6f}"
+        )
+
+        print(
+            f"Max Target Confidence  : {target_scores.max().item():.6f}"
+        )
+
+        print(
+            f"Min Target Confidence  : {target_scores.min().item():.6f}"
+        )
+
+        # -------------------------------------------------
         # -------------------------------------------------
 
         self.optimizer.zero_grad()
@@ -192,12 +212,33 @@ class PatchTrainer:
 
         self.optimizer.step()
 
+        # -------------------------------------------------
+        # Keep patch values in valid image range [0, 1]
+        # -------------------------------------------------
+
+        with torch.no_grad():
+            self.patch.patch.clamp_(
+                self.cfg["patch"]["clamp_min"],
+                self.cfg["patch"]["clamp_max"],
+            )
+
+        print()
+        print("Patch Mean :", self.patch().mean().item())
+        print(
+            "Patch Min  :",
+            self.patch().min().item(),
+        )
+        print(
+            "Patch Max  :",
+            self.patch().max().item(),
+        )
+
         print()
         print("Optimizer Step Completed")
         print("=" * 60)
 
         return loss
-
+    
     # -------------------------------------------------
     # Logging
     # -------------------------------------------------

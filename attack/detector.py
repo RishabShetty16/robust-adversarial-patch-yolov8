@@ -94,10 +94,26 @@ class YOLODetector:
     def forward(self, image):
         """
         Forward pass for training.
-
-        Returns raw detector outputs without using predict().
         """
+
         outputs = self.model.model(image)
+
+        print("\n========== DETECTOR DEBUG ==========")
+        print("Type:", type(outputs))
+
+        if isinstance(outputs, (list, tuple)):
+            print("Length:", len(outputs))
+
+            for i, out in enumerate(outputs):
+                if hasattr(out, "shape"):
+                    print(f"Output[{i}] Shape:", out.shape)
+                else:
+                    print(f"Output[{i}] Type:", type(out))
+        else:
+            if hasattr(outputs, "shape"):
+                print("Shape:", outputs.shape)
+
+        print("====================================\n")
 
         return outputs
 
