@@ -10,45 +10,42 @@ The project follows a modular, research-oriented design where each component is 
 
 The current implementation focuses on building a fully differentiable optimization pipeline for adversarial patch training.
 
-```
-Configuration
-        │
-        ▼
-Dataset
-        │
-        ▼
-Image
-        │
-        ▼
-Adversarial Patch
-        │
-        ▼
-Patch Applier
-        │
-        ▼
-Patched Image
-        │
-        ▼
-YOLO Detector
-        │
-        ▼
-Attack Target
-        │
-        ▼
-Baseline Loss
-        │
-        ▼
-Backpropagation
-        │
-        ▼
-Optimizer
-        │
-        ▼
-Updated Patch
-```
-
----
-
+                     Configuration
+                           │
+                           ▼
+                 COCO Dataset Loader
+                           │
+                           ▼
+                    PyTorch DataLoader
+                           │
+                           ▼
+                  Adversarial Patch
+                           │
+                           ▼
+                    Patch Applier
+                           │
+                           ▼
+                      YOLO Detector
+                           │
+                           ▼
+                    Attack Target
+                           │
+                           ▼
+                     Baseline Loss
+                           │
+                           ▼
+                     Backpropagation
+                           │
+                           ▼
+                       Optimizer
+                           │
+                           ▼
+                    Updated Patch
+                           │
+              ┌────────────┴────────────┐
+              ▼                         ▼
+      Checkpoint Saving          Training Logs
+      
 # High-Level Design
 
 ```
@@ -132,6 +129,18 @@ outputs/
 ```
 
 ---
+
+## Training Infrastructure
+
+The training engine is responsible for:
+
+- Multi-epoch optimization
+- Batch processing
+- Gradient computation
+- Optimizer updates
+- Loss tracking
+- Patch statistics
+- Checkpoint management
 
 # Module Responsibilities
 

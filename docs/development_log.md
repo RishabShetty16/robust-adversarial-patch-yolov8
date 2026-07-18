@@ -467,3 +467,42 @@ Optimizer Step Completed
 ### Status
 
 ✅ Completed
+
+# Commit 11
+
+## Training Infrastructure
+
+### Objective
+
+Transform the differentiable optimization pipeline into a reusable training framework supporting long-running experiments.
+
+### Added
+
+- Configurable multi-epoch training
+- DataLoader integration
+- Modular training loop
+- Batch processing
+- Average epoch loss computation
+- Checkpoint saving
+- Loss history logging
+- Patch statistics logging
+
+### Validation
+
+Successfully trained for 20 epochs.
+
+Observed monotonic reduction in optimization loss:
+
+Epoch 1
+Loss = 9.6432
+
+↓
+
+Epoch 20
+Loss = 9.2688
+
+The successful decrease confirms that gradients propagate correctly from the detector output back to the adversarial patch while maintaining stable optimization.
+
+### Next
+
+Implement a detector-specific adversarial objective (person suppression loss) to replace the baseline optimization loss.

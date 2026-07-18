@@ -24,14 +24,13 @@ class PatchApplier:
     """
 
     def __init__(self):
-
         pass
 
     # -------------------------------------------------------
-    # Apply to one image
+    # Internal helper
     # -------------------------------------------------------
 
-    def apply(
+    def _apply_single(
         self,
         image: torch.Tensor,
         patch: torch.Tensor,
@@ -41,28 +40,14 @@ class PatchApplier:
         """
         Apply a patch to a single image.
 
-        Parameters
-        ----------
-        image : Tensor
-            Shape (3,H,W)
-
-        patch : Tensor
-            Shape (3,P,P)
-
-        x : int
-            Left coordinate
-
-        y : int
-            Top coordinate
+        image : (3,H,W)
+        patch : (3,P,P)
         """
 
         patched = image.clone()
 
         _, H, W = patched.shape
-
         _, P, _ = patch.shape
-
-        # Keep patch inside image
 
         x = max(0, min(x, W - P))
         y = max(0, min(y, H - P))
@@ -78,40 +63,59 @@ class PatchApplier:
         return patched
 
     # -------------------------------------------------------
-    # Apply to batch
+    # Public API
     # -------------------------------------------------------
 
-    def apply_batch(
+    def apply(
         self,
-        images: torch.Tensor,
+        image: torch.Tensor,
         patch: torch.Tensor,
         x: int,
         y: int,
     ) -> torch.Tensor:
         """
-        Apply patch to a batch.
+        Apply a patch to either
 
-        Parameters
-        ----------
-        images : Tensor
+        Single Image:
+            (3,H,W)
 
-            Shape (B,3,H,W)
+        or
+
+        Batch:
+            (B,3,H,W)
         """
 
-        outputs = []
+        if image.ndim == 3:
 
-        for image in images:
-
-            outputs.append(
-                self.apply(
-                    image,
-                    patch,
-                    x,
-                    y,
-                )
+            return self._apply_single(
+                image,
+                patch,
+                x,
+                y,
             )
 
-        return torch.stack(outputs)
+        elif image.ndim == 4:
+
+            outputs = []
+
+            for img in image:
+
+                outputs.append(
+                    self._apply_single(
+                        img,
+                        patch,
+                        x,
+                        y,
+                    )
+                )
+
+            return torch.stack(outputs)
+
+        else:
+
+            raise ValueError(
+                f"Expected image tensor of shape (3,H,W) or (B,3,H,W), got {image.shape}"
+            )
 
     # -------------------------------------------------------
 
@@ -140,11 +144,20 @@ if __name__ == "__main__":
     )
 
     print(applier)
-
     print()
 
+    print("Single Image")
     print("Output Shape :", output.shape)
 
-    print("Min :", output.min().item())
+    batch = torch.zeros(4, 3, 640, 640)
 
-    print("Max :", output.max().item())
+    output = applier.apply(
+        image=batch,
+        patch=patch,
+        x=100,
+        y=120,
+    )
+
+    print()
+    print("Batch")
+    print("Output Shape :", output.shape)

@@ -11,82 +11,70 @@ The long-term objective is to generate physically robust adversarial patches cap
 ---
 
 # Current Pipeline
-
-```
 Configuration
-      │
-      ▼
-Dataset Loader
-      │
-      ▼
+        │
+        ▼
+Dataset + DataLoader
+        │
+        ▼
 Adversarial Patch
-      │
-      ▼
-Patch Applier
-      │
-      ▼
-YOLOv8 Detector
-      │
-      ▼
-Attack Target Extraction
-      │
-      ▼
-Baseline Optimization Loss
-      │
-      ▼
+        │
+        ▼
+Patch Application
+        │
+        ▼
+YOLO Detector
+        │
+        ▼
+Attack Target
+        │
+        ▼
+Baseline Loss
+        │
+        ▼
 Backpropagation
-      │
-      ▼
+        │
+        ▼
 Optimizer
-      │
-      ▼
+        │
+        ▼
 Updated Patch
-```
-
+        │
+        ▼
+Checkpoint + Logs
 ---
 
-# Project Progress
+## Current Progress
 
-## ✅ Completed
+### ✅ Completed
 
-- Configuration Management
-- Utility Functions
-- Adversarial Patch Module
-- Dataset Loader
-- Patch Applier
-- YOLOv8 Detector Wrapper
-- Detection Parser
-- Loss Function Framework
-- Attack Target Abstraction
-- Differentiable YOLO Forward Pass
-- End-to-End Optimization Pipeline
-- Gradient Verification
-- Stage A Baseline Experiment
+- Configuration system
+- COCO dataset loader
+- Adversarial patch representation
+- Patch application
+- YOLO detector wrapper
+- Detection parser
+- Attack target abstraction
+- Differentiable optimization pipeline
+- Multi-epoch training
+- DataLoader integration
+- Checkpoint saving
+- Loss history logging
+- Patch statistics logging
 
----
+### 🚧 In Progress
 
-## 🚧 In Progress
+- Person suppression objective
+- EOT transformations
+- Physical robustness
+- Evaluation metrics
 
-- Multi-Epoch Training Loop
-- DataLoader Integration
-- Checkpoint Saving
-- Logging
-- Person Suppression Loss
-- Expectation over Transformation (EOT)
+### 📌 Planned
 
----
-
-## 📅 Planned
-
-- Physical Attack Pipeline
-- Non-Printability Score (NPS)
-- Patch Regularization
-- Evaluation Metrics
-- Benchmark Experiments
-- COCO Evaluation
-- Physical World Validation
-
----
+- Attack Success Rate (ASR)
+- Multi-image optimization
+- Physical-world evaluation
+- Benchmark experiments
 
 # Repository Structure
 
@@ -126,28 +114,15 @@ outputs/
 
 # Current Milestone
 
-**Commit 10**
-
-✅ Differentiable Adversarial Patch Optimization Pipeline
-
-Implemented:
-
-- Differentiable YOLO forward pass
-- Attack target abstraction
-- Baseline optimization loss
-- End-to-end gradient propagation
-- Optimizer integration
-- Verified gradient flow from detector to adversarial patch
-
----
-
-# Future Milestones
-
 - **Commit 11**
   - Multi-Epoch Training Framework
   - DataLoader
   - Logging
   - Checkpoint Saving
+
+---
+
+# Future Milestones
 
 - **Commit 12**
   - Detector-specific Person Suppression Loss
