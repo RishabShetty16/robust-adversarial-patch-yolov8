@@ -33,11 +33,6 @@ optimizer:
   iterations: 1000
   grad_clip: 5.0
 
-  scheduler:
-    type: cosine
-    T_max: 1000
-    eta_min: 0.0001
-
 attack:
   mode: suppression
   target_class: person
@@ -80,3 +75,9 @@ training:
   num_workers: 0
   save_every: 5
   print_every: 1
+
+scheduler:
+  type: cosine
+  enabled: true
+  T_max: 50
+  eta_min: 0.0001

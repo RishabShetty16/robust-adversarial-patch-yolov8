@@ -42,6 +42,7 @@ class PatchTrainer:
         dataset,
         patch,
         optimizer,
+        scheduler,
         patch_applier,
     ):
         self.cfg = cfg
@@ -49,6 +50,7 @@ class PatchTrainer:
         self.dataset = dataset
         self.patch = patch
         self.optimizer = optimizer
+        self.scheduler = scheduler
         self.patch_applier = patch_applier
         self.eot = EOT(cfg)
 
@@ -120,6 +122,9 @@ class PatchTrainer:
             print("=" * 60)
 
             average_loss = self.train_epoch()
+
+            if self.scheduler is not None:
+                self.scheduler.step()
 
             self.loss_history.append(average_loss)
 
@@ -266,6 +271,9 @@ class PatchTrainer:
         print("-" * 60)
         print(f"Epoch        : {epoch + 1}")
         print(f"Average Loss : {average_loss:.6f}")
+        current_lr = self.optimizer.param_groups[0]["lr"]
+
+        print(f"Learning Rate : {current_lr:.6f}")
         print()
         print(f"Patch Mean   : {patch.mean().item():.6f}")
         print(f"Patch Std    : {patch.std().item():.6f}")

@@ -65,6 +65,28 @@ def main():
     )
 
     # ------------------------------------
+    # Learning Rate Scheduler
+    # ------------------------------------
+
+    scheduler = None
+
+    if cfg["scheduler"]["enabled"]:
+
+        if cfg["scheduler"]["type"] == "cosine":
+
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer,
+                T_max=cfg["scheduler"]["T_max"],
+                eta_min=cfg["scheduler"]["eta_min"],
+            )
+
+        else:
+
+            raise ValueError(
+                f"Unknown scheduler type: {cfg['scheduler']['type']}"
+            )
+
+    # ------------------------------------
     # Patch Applier
     # ------------------------------------
 
@@ -80,6 +102,7 @@ def main():
         dataset,
         patch,
         optimizer,
+        scheduler,
         patch_applier,
     )
 
