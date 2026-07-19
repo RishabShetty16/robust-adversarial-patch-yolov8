@@ -182,6 +182,27 @@ Patch Update
 
 ---
 
+## Evaluation Pipeline
+
+The repository includes a complete evaluation framework.
+
+Features
+
+- Original image inference
+- Patched image inference
+- Detection suppression metrics
+- Confidence statistics
+- Annotated detection visualizations
+- Side-by-side comparison generation
+- CSV export
+- JSON export
+
+Example
+
+Original detections : 3
+Patched detections  : 2
+Suppression Rate    : 33.33%
+
 # Project Status
 
 **Current Stage:** Stage A — Differentiable Optimization Pipeline ✅
