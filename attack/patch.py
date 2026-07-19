@@ -9,7 +9,7 @@ can be optimized using standard PyTorch optimizers.
 
 Responsibilities
 ----------------
-- Initialize the patch
+- Initialize the patch using multiple strategies
 - Store the learnable tensor
 - Clamp pixel values
 - Save / load
@@ -34,6 +34,13 @@ class AdversarialPatch(nn.Module):
     Learnable adversarial patch.
     """
 
+    SUPPORTED_INITIALIZATIONS = (
+        "gray",
+        "random",
+        "checkerboard",
+        "gaussian",
+    )
+
     def __init__(
         self,
         size: int = 160,
@@ -54,48 +61,76 @@ class AdversarialPatch(nn.Module):
         )
 
     # ---------------------------------------------------------
+    # Individual Initialization Methods
+    # ---------------------------------------------------------
+
+    def _initialize_gray(self) -> torch.Tensor:
+
+        return torch.full(
+            (3, self.size, self.size),
+            0.5,
+            dtype=torch.float32,
+        )
+
+    def _initialize_random(self) -> torch.Tensor:
+
+        return torch.rand(
+            (3, self.size, self.size),
+            dtype=torch.float32,
+        )
+
+    def _initialize_checkerboard(self) -> torch.Tensor:
+
+        patch = torch.zeros(
+            (3, self.size, self.size),
+            dtype=torch.float32,
+        )
+
+        step = 16
+
+        for i in range(self.size):
+            for j in range(self.size):
+
+                if ((i // step) + (j // step)) % 2 == 0:
+                    patch[:, i, j] = 1.0
+
+        return patch
+
+    def _initialize_gaussian(self) -> torch.Tensor:
+
+        patch = torch.randn(
+            (3, self.size, self.size),
+            dtype=torch.float32,
+        )
+
+        patch = (patch - patch.min()) / (
+            patch.max() - patch.min()
+        )
+
+        return patch
+
+    # ---------------------------------------------------------
     # Patch Initialization
     # ---------------------------------------------------------
 
     def _initialize_patch(self) -> torch.Tensor:
 
         if self.initialization == "gray":
-
-            patch = torch.full(
-                (3, self.size, self.size),
-                0.5,
-                dtype=torch.float32,
-            )
+            return self._initialize_gray()
 
         elif self.initialization == "random":
-
-            patch = torch.rand(
-                (3, self.size, self.size),
-                dtype=torch.float32,
-            )
+            return self._initialize_random()
 
         elif self.initialization == "checkerboard":
+            return self._initialize_checkerboard()
 
-            patch = torch.zeros(
-                (3, self.size, self.size),
-                dtype=torch.float32,
-            )
+        elif self.initialization == "gaussian":
+            return self._initialize_gaussian()
 
-            step = 16
-
-            for i in range(self.size):
-                for j in range(self.size):
-
-                    if ((i // step) + (j // step)) % 2 == 0:
-                        patch[:, i, j] = 1.0
-
-        else:
-
-            raise ValueError(
-                f"Unknown initialization: {self.initialization}"
-            )
-
-        return patch
+        raise ValueError(
+            f"Unknown initialization '{self.initialization}'. "
+            f"Supported values: {self.SUPPORTED_INITIALIZATIONS}"
+        )
 
     # ---------------------------------------------------------
     # Forward
@@ -234,27 +269,35 @@ class AdversarialPatch(nn.Module):
 
 if __name__ == "__main__":
 
-    patch = AdversarialPatch(
-        size=160,
-        initialization="gray",
-    )
+    for mode in AdversarialPatch.SUPPORTED_INITIALIZATIONS:
 
-    print(patch)
+        print("=" * 60)
+        print(f"Testing Initialization : {mode}")
+        print("=" * 60)
 
-    print("\nStatistics")
+        patch = AdversarialPatch(
+            size=160,
+            initialization=mode,
+        )
 
-    for key, value in patch.statistics().items():
+        print(patch)
 
-        print(f"{key}: {value}")
+        print("\nStatistics")
 
-    patch.clamp()
+        stats = patch.statistics()
 
-    patch.save(
-        "outputs/patches/test_patch.pt"
-    )
+        for key, value in stats.items():
 
-    patch.visualize(
-        save_path="outputs/patches/test_patch.png"
-    )
+            print(f"{key}: {value}")
 
-    print("\nPatch saved successfully.")
+        patch.clamp()
+
+        patch.save(
+            f"outputs/patches/{mode}_patch.pt"
+        )
+
+        patch.visualize(
+            save_path=f"outputs/patches/{mode}_patch.png"
+        )
+
+        print(f"\n✓ {mode.capitalize()} patch saved successfully.\n")
