@@ -1,34 +1,48 @@
 """
 eot.py
 
-Differentiable Expectation Over Transformation (EOT)
+Expectation Over Transformation (EOT)
 
-Author:
-    Rishab Shetty
+Applies random transformations to the adversarial patch.
 """
+
+from __future__ import annotations
+
+import random
+
+import torch
+import torchvision.transforms.functional as TF
+
 
 class EOT:
 
     def __init__(self, cfg):
+
         self.cfg = cfg
 
-    def random_rotation(self, image):
-        raise NotImplementedError
+        self.enabled = cfg["eot"]["enabled"]
+        self.max_rotation = cfg["eot"]["rotation"]["degrees"]
 
-    def random_scale(self, image):
-        raise NotImplementedError
+    def __call__(self, patch: torch.Tensor):
 
-    def random_brightness(self, image):
-        raise NotImplementedError
+        if not self.enabled:
+            return patch
 
-    def random_contrast(self, image):
-        raise NotImplementedError
+        angle = random.uniform(
+            -self.max_rotation,
+            self.max_rotation,
+        )
 
-    def apply(self, image):
-        raise NotImplementedError
+        patch = TF.rotate(
+            patch,
+            angle,
+            interpolation=TF.InterpolationMode.BILINEAR,
+        )
 
-    def __call__(self, image):
-        return self.apply(image)
+        patch = patch.clamp(0.0, 1.0)
+
+        return patch
 
     def __repr__(self):
-        return "EOT()"
+
+        return "EOT(rotation)"

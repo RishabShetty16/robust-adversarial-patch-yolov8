@@ -23,6 +23,7 @@ import os
 import csv
 import torch
 
+from attack.eot import EOT
 from torch.utils.data import DataLoader
 
 from attack.losses import person_suppression_loss
@@ -49,6 +50,7 @@ class PatchTrainer:
         self.patch = patch
         self.optimizer = optimizer
         self.patch_applier = patch_applier
+        self.eot = EOT(cfg)
 
         self.attack_target = AttackTarget(cfg)
 
@@ -160,6 +162,7 @@ class PatchTrainer:
         print("Batch Shape :", image.shape)
 
         patch = self.patch()
+        patch = self.eot(patch)
 
         print("Patch Shape :", patch.shape)
 
