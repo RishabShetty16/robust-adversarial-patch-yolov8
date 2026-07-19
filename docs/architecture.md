@@ -1,15 +1,16 @@
 # Project Architecture
 
-This document describes the overall software architecture of the **Robust Adversarial Patch Attack for YOLOv8** framework.
+This document describes the software architecture of the **Robust Adversarial Patch Attack for YOLOv8** framework.
 
-The project follows a modular, research-oriented design where each component is responsible for a single task. This allows individual modules to be replaced or extended without affecting the rest of the pipeline.
+The project follows a **modular, research-oriented architecture**, where each component has a single responsibility. The design emphasizes reproducibility, extensibility, and maintainability, allowing individual modules to evolve independently while supporting end-to-end differentiable adversarial patch optimization.
 
 ---
 
-# Stage A Architecture
+# Architecture Overview
 
-The current implementation focuses on building a fully differentiable optimization pipeline for adversarial patch training.
+The current implementation provides a complete training and evaluation pipeline for learning universal adversarial patches against YOLOv8.
 
+```text
                      Configuration
                            │
                            ▼
@@ -19,128 +20,154 @@ The current implementation focuses on building a fully differentiable optimizati
                     PyTorch DataLoader
                            │
                            ▼
-                  Adversarial Patch
+                 Adversarial Patch
+                           │
+                           ▼
+         Expectation over Transformation (EOT)
+                           │
+                           ▼
+              Random Patch Placement
                            │
                            ▼
                     Patch Applier
                            │
                            ▼
-                      YOLO Detector
+                  Patched Image
                            │
                            ▼
-                    Attack Target
+                    YOLOv8 Detector
                            │
                            ▼
-                     Baseline Loss
+                 Detection Parsing
                            │
                            ▼
-                     Backpropagation
+                Attack Target Selection
                            │
                            ▼
-                       Optimizer
+             Person Suppression Loss
                            │
                            ▼
-                    Updated Patch
+                  Backpropagation
                            │
-              ┌────────────┴────────────┐
-              ▼                         ▼
-      Checkpoint Saving          Training Logs
-      
+                           ▼
+                   Adam Optimizer
+                           │
+                           ▼
+          Cosine Learning Rate Scheduler
+                           │
+                           ▼
+                   Updated Patch
+                           │
+           ┌───────────────┴───────────────┐
+           ▼                               ▼
+   Checkpoint Saving              Loss History Logging
+```
+
+---
+
 # High-Level Design
 
-```
-                    Configuration
-                          │
-                          ▼
-                     Dataset Loader
-                          │
-                          ▼
-                     Input Image
-                          │
-                          ▼
-                 Adversarial Patch
-                          │
-                          ▼
-                    Patch Applier
-                          │
-                          ▼
-                    Patched Image
-                          │
-                          ▼
-                    YOLO Detector
-                          │
-                          ▼
-                   Attack Target
-                          │
-                          ▼
-                  Baseline Loss
-                          │
-                          ▼
-                   Backpropagation
-                          │
-                          ▼
-                     Optimizer
-                          │
-                          ▼
-                    Updated Patch
+```text
+Configuration
+      │
+      ▼
+Dataset Loader
+      │
+      ▼
+Input Image
+      │
+      ▼
+Adversarial Patch
+      │
+      ▼
+Expectation over Transformation
+      │
+      ▼
+Random Patch Placement
+      │
+      ▼
+Patch Applier
+      │
+      ▼
+Patched Image
+      │
+      ▼
+YOLOv8 Detector
+      │
+      ▼
+Detection Parser
+      │
+      ▼
+Attack Target
+      │
+      ▼
+Person Suppression Loss
+      │
+      ▼
+Backpropagation
+      │
+      ▼
+Adam Optimizer
+      │
+      ▼
+Cosine LR Scheduler
+      │
+      ▼
+Updated Patch
 ```
 
 ---
 
 # Repository Structure
 
-```
-attack/
+```text
+robust-adversarial-patch-yolov8/
+
 │
-├── configs/
-│     └── default.yaml
+├── attack/
+│   ├── configs/
+│   │   └── default.yaml
+│   ├── attack_target.py
+│   ├── config.py
+│   ├── dataset.py
+│   ├── detector.py
+│   ├── eot.py
+│   ├── losses.py
+│   ├── parser.py
+│   ├── patch.py
+│   ├── patch_applier.py
+│   ├── trainer.py
+│   └── utils.py
 │
-├── attack_target.py
-├── config.py
-├── dataset.py
-├── detector.py
-├── losses.py
-├── parser.py
-├── patch.py
-├── patch_applier.py
-├── trainer.py
-└── utils.py
-
-experiments/
+├── evaluation/
+│   ├── evaluate_patch.py
+│   ├── export.py
+│   ├── metrics.py
+│   └── visualization.py
 │
-├── stage_a_baseline.py
-└── stage_a_train.py
-
-evaluation/
-
-physical/
-
-defense/
-
-tests/
-
-data/
-
-outputs/
-├── checkpoints/
-├── figures/
-├── logs/
-└── patches/
+├── experiments/
+│
+├── physical/
+│
+├── defense/
+│
+├── tests/
+│
+├── data/
+│
+├── outputs/
+│   ├── checkpoints/
+│   ├── figures/
+│   ├── logs/
+│   └── patches/
+│
+├── train.py
+├── evaluate.py
+├── requirements.txt
+└── README.md
 ```
 
 ---
-
-## Training Infrastructure
-
-The training engine is responsible for:
-
-- Multi-epoch optimization
-- Batch processing
-- Gradient computation
-- Optimizer updates
-- Loss tracking
-- Patch statistics
-- Checkpoint management
 
 # Module Responsibilities
 
@@ -150,8 +177,9 @@ Responsible for:
 
 - Loading experiment configuration
 - Device selection
-- Parameter validation
-- Experiment summary
+- Hyperparameter management
+- Experiment reproducibility
+- Scheduler configuration
 
 ---
 
@@ -163,18 +191,45 @@ Responsible for:
 - Image preprocessing
 - Tensor conversion
 - Dataset abstraction
+- DataLoader compatibility
 
 ---
 
-## Patch
+## Adversarial Patch
 
 Responsible for:
 
-- Learnable adversarial patch
-- Initialization
-- Clamping
-- Saving
-- Visualization
+- Learnable patch representation
+- Multiple initialization strategies
+- Gradient optimization
+- Pixel value clamping
+- Checkpoint serialization
+
+Supported initialization strategies:
+
+- Gray
+- Random
+- Checkerboard
+- Gaussian
+
+---
+
+## Expectation over Transformation (EOT)
+
+Responsible for improving robustness during optimization.
+
+Current transformations:
+
+- Rotation
+- Scaling
+
+Framework prepared for future support of:
+
+- Brightness
+- Contrast
+- Perspective
+- Motion blur
+- Noise
 
 ---
 
@@ -183,9 +238,10 @@ Responsible for:
 Responsible for:
 
 - Overlaying the adversarial patch
+- Random patch placement
 - Boundary checking
-- Pixel clamping
 - Batch compatibility
+- Pixel clamping
 
 ---
 
@@ -195,7 +251,9 @@ Responsible for:
 
 - Loading YOLOv8
 - Differentiable forward pass
-- Standard inference interface
+- Configurable confidence threshold
+- Configurable IoU threshold
+- Device abstraction
 
 ---
 
@@ -203,10 +261,9 @@ Responsible for:
 
 Responsible for:
 
-- Parsing inference outputs
-- Producing standardized detection dictionaries
-
-**Note:** This module is primarily used during evaluation and baseline inference rather than the optimization pipeline.
+- Parsing detector outputs
+- Producing standardized detection tensors
+- Supporting evaluation and visualization
 
 ---
 
@@ -214,23 +271,24 @@ Responsible for:
 
 Responsible for:
 
-- Extracting optimization targets from detector outputs
-- Isolating detector-specific logic from the trainer
-- Providing a stable interface for future attack objectives
+- Extracting optimization targets
+- Selecting Top-K detections
+- Isolating detector-specific logic
+- Providing detector-independent interfaces for future attack objectives
 
 ---
 
 ## Loss Functions
 
-Current losses include:
+Current implementation includes:
 
-- Baseline optimization loss
-- Confidence loss
-- Objectness loss
-- Total Variation (TV) loss
-- Non-Printability Score (NPS) placeholder
+- Person Suppression Loss
+- Confidence Loss
+- Objectness Loss
+- Total Variation Loss
+- Non-Printability Score (placeholder)
 
-Future versions will include detector-specific adversarial objectives.
+The primary optimization objective minimizes person detection confidence while preserving differentiability.
 
 ---
 
@@ -238,84 +296,175 @@ Future versions will include detector-specific adversarial objectives.
 
 Responsible for:
 
-- Patch optimization
-- Forward pass
-- Loss computation
-- Backpropagation
-- Optimizer updates
-
-Future commits will extend this module with:
-
-- Multi-epoch training
+- Multi-epoch optimization
 - Batch processing
-- Checkpointing
-- Logging
+- Random patch placement
+- Forward propagation
+- Loss computation
+- Gradient computation
+- Optimizer updates
+- Learning rate scheduling
+- Patch statistics
+- Checkpoint management
+- Loss history generation
+
+---
+
+## Evaluation
+
+Responsible for:
+
+- Original image inference
+- Patched image inference
+- Detection comparison
+- Suppression metrics
+- Confidence statistics
+- Detection visualization
+- Side-by-side comparison images
+- CSV export
+- JSON export
+
+---
+
+# Training Workflow
+
+```text
+Load Configuration
+        │
+        ▼
+Load Dataset
+        │
+        ▼
+Initialize Patch
+        │
+        ▼
+Initialize Optimizer
+        │
+        ▼
+Initialize Scheduler
+        │
+        ▼
+Epoch Loop
+        │
+        ▼
+Apply EOT
+        │
+        ▼
+Random Patch Placement
+        │
+        ▼
+Forward Through YOLOv8
+        │
+        ▼
+Extract Targets
+        │
+        ▼
+Compute Suppression Loss
+        │
+        ▼
+Backpropagation
+        │
+        ▼
+Optimizer Step
+        │
+        ▼
+Scheduler Step
+        │
+        ▼
+Clamp Patch
+        │
+        ▼
+Save Metrics
+        │
+        ▼
+Save Checkpoint
+```
+
+---
+
+# Evaluation Workflow
+
+```text
+Original Image
+      │
+      ▼
+YOLOv8 Inference
+      │
+      ▼
+Original Metrics
+      │
+      ├───────────────┐
+      ▼               │
+Apply Patch           │
+      ▼               │
+Patched Image         │
+      ▼               │
+YOLOv8 Inference      │
+      ▼               │
+Patched Metrics       │
+      └───────┬───────┘
+              ▼
+Comparison Metrics
+              ▼
+CSV Export
+              ▼
+JSON Export
+              ▼
+Detection Visualizations
+```
 
 ---
 
 # Design Principles
 
-The repository is designed to be:
+The framework is designed to be:
 
-- **Modular** — each module has a single responsibility.
-- **Reproducible** — configuration-driven experiments.
-- **Extensible** — components can be replaced independently.
-- **Research-oriented** — suitable for experimentation and benchmarking.
-- **Maintainable** — clear separation between training, evaluation, and attack logic.
+- **Modular** – each component has a single responsibility.
+- **Extensible** – new detectors, losses, and transformations can be integrated easily.
+- **Reproducible** – experiments are configuration-driven.
+- **Research-Oriented** – suitable for benchmarking adversarial attacks.
+- **Maintainable** – clear separation of training, evaluation, and attack logic.
+- **Scalable** – prepared for larger datasets and additional attack objectives.
 
 ---
 
-# Current Status
+# Current Status (Commit 20)
 
-## ✅ Completed
+## Completed
 
-- Configuration Management
-- Dataset Loader
-- Adversarial Patch Module
-- Patch Applier
-- YOLO Detector Wrapper
+- Configuration System
+- COCO Dataset Loader
+- YOLOv8 Integration
 - Detection Parser
-- Loss Function Framework
-- Attack Target Abstraction
-- Differentiable Optimization Pipeline
-- Gradient Verification
+- Adversarial Patch Module
+- Multiple Patch Initialization Strategies
+- Random Patch Placement
+- Patch Application
+- Attack Target Extraction
+- Person Suppression Loss
+- EOT (Rotation + Scaling)
+- Multi-Epoch Training
+- Adam Optimization
+- Cosine Learning Rate Scheduler
+- Checkpoint Saving
+- Loss History Logging
+- Evaluation Framework
+- Detection Visualization
+- CSV Export
+- JSON Export
 
 ---
-# Commit 12 – Detector-Aware Optimization
 
-The optimization objective now directly depends on YOLOv8 predictions instead of a placeholder loss.
+# Future Extensions
 
-Pipeline:
+Planned improvements include:
 
-Image
-↓
-PatchApplier
-↓
-Patched Image
-↓
-YOLOv8 Forward Pass
-↓
-AttackTarget
-↓
-Target Class Scores
-↓
-Person Suppression Loss
-↓
-Gradient Computation
-↓
-Adam Optimizer
-↓
-Updated Patch
-
-The patch is clamped after every optimization step to ensure pixel values remain within the valid image range [0,1].
-
-## 🚧 Next Stage
-
-The next development milestone introduces:
-
-- Multi-epoch training loop
-- DataLoader integration
-- Logging
-- Checkpoint saving
-- Detector-specific person suppression loss
-- Expectation over Transformation (EOT)
+- Best checkpoint selection
+- Training loss visualization
+- Multi-image optimization
+- Multi-image evaluation
+- Stronger EOT transformations
+- Physical-world evaluation
+- Attack Success Rate (ASR)
+- Detector transferability experiments
+- Benchmarking across YOLO variants

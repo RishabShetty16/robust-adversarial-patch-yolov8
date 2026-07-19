@@ -1,19 +1,34 @@
 # Robust Adversarial Patch Attack for YOLOv8
 
-## Overview
+A modular, research-oriented framework for developing **robust adversarial patch attacks** against **YOLOv8** using PyTorch.
 
-This repository implements a modular and research-oriented framework for developing robust adversarial patch attacks against YOLOv8.
-
-The project is being built incrementally, with each milestone introducing a new component of the adversarial attack pipeline while maintaining a clean and extensible architecture.
-
-The long-term objective is to generate physically robust adversarial patches capable of suppressing object detection under real-world transformations.
+The goal of this project is to generate **universal adversarial patches** capable of suppressing object detection while remaining effective under various transformations, forming the foundation for future physical-world adversarial attacks.
 
 ---
 
-# Current Pipeline
+# Features
+
+- Modular adversarial patch implementation
+- YOLOv8 detector integration
+- COCO dataset support
+- End-to-end differentiable optimization
+- Person suppression objective
+- Random patch placement
+- Expectation over Transformation (EOT)
+- Configurable patch initialization
+- Cosine learning rate scheduler
+- Multi-epoch training pipeline
+- Automatic checkpoint saving
+- Training loss logging
+- Comprehensive evaluation framework
+- CSV and JSON metric export
+- Detection visualization
+
 ---
 
-```
+# Current Training Pipeline
+
+```text
                      Configuration
                            │
                            ▼
@@ -23,152 +38,285 @@ The long-term objective is to generate physically robust adversarial patches cap
                     PyTorch DataLoader
                            │
                            ▼
-                  Adversarial Patch
+                 Adversarial Patch
                            │
                            ▼
-                    Patch Applier
+               Expectation over Transformation
                            │
                            ▼
-                      YOLO Detector
+                  Random Patch Placement
                            │
                            ▼
-                    Attack Target
+                     Patch Applier
                            │
                            ▼
-                     Baseline Loss
+                     YOLOv8 Detector
                            │
                            ▼
-                     Backpropagation
+                 Detection Parsing
                            │
                            ▼
-                       Optimizer
+                 Attack Target Selection
+                           │
+                           ▼
+             Person Suppression Loss
+                           │
+                           ▼
+                    Backpropagation
+                           │
+                           ▼
+                      Adam Optimizer
+                           │
+                           ▼
+              Cosine Learning Rate Scheduler
                            │
                            ▼
                     Updated Patch
                            │
-              ┌────────────┴────────────┐
-              ▼                         ▼
-      Checkpoint Saving          Training Logs
+          ┌────────────────┴────────────────┐
+          ▼                                 ▼
+   Checkpoint Saving              Loss History Logging
 ```
 
 ---
 
-## Current Progress
-
-### ✅ Completed
-
-- Configuration system
-- COCO dataset loader
-- Adversarial patch representation
-- Patch application
-- YOLO detector wrapper
-- Detection parser
-- Attack target abstraction
-- Differentiable optimization pipeline
-- Multi-epoch training
-- DataLoader integration
-- Checkpoint saving
-- Loss history logging
-- Patch statistics logging
-
-### 🚧 In Progress
-
-- Person suppression objective
-- EOT transformations
-- Physical robustness
-- Evaluation metrics
-
-### 📌 Planned
-
-- Attack Success Rate (ASR)
-- Multi-image optimization
-- Physical-world evaluation
-- Benchmark experiments
-
 # Repository Structure
 
+```text
+robust-adversarial-patch-yolov8/
+
+│
+├── attack/
+│   ├── configs/
+│   │   └── default.yaml
+│   ├── attack_target.py
+│   ├── config.py
+│   ├── dataset.py
+│   ├── detector.py
+│   ├── eot.py
+│   ├── losses.py
+│   ├── parser.py
+│   ├── patch.py
+│   ├── patch_applier.py
+│   ├── trainer.py
+│   └── utils.py
+│
+├── evaluation/
+│   ├── evaluate_patch.py
+│   ├── export.py
+│   ├── metrics.py
+│   └── visualization.py
+│
+├── experiments/
+│
+├── tests/
+│
+├── outputs/
+│   ├── checkpoints/
+│   ├── figures/
+│   ├── logs/
+│   └── patches/
+│
+├── data/
+│
+├── evaluate.py
+├── train.py
+├── requirements.txt
+└── README.md
 ```
-attack/
-│
-├── configs/
-├── attack_target.py
-├── config.py
-├── dataset.py
-├── detector.py
-├── losses.py
-├── parser.py
-├── patch.py
-├── patch_applier.py
-├── trainer.py
-├── utils.py
-│
-experiments/
-│
-├── stage_a_baseline.py
-├── stage_a_train.py
-│
-tests/
-│
-data/
-│
+
+---
+
+# Implemented Components
+
+## Adversarial Patch
+
+- Learnable universal adversarial patch
+- Multiple initialization strategies
+  - Gray
+  - Random
+  - Checkerboard
+  - Gaussian
+- Pixel value clamping
+- Automatic checkpoint serialization
+
+---
+
+## Dataset
+
+- COCO image loader
+- PyTorch Dataset interface
+- DataLoader integration
+- Configurable batch size
+- Configurable image resolution
+
+---
+
+## Detector
+
+- Ultralytics YOLOv8 integration
+- Configurable confidence threshold
+- Configurable IoU threshold
+- Device auto-selection
+- Detection parsing
+
+---
+
+## Attack Target
+
+Supports detector-aware optimization by extracting:
+
+- Person confidence scores
+- Top-K detections
+- Batch-wise target tensors
+
+---
+
+## Loss Function
+
+Current objective:
+
+- Person Suppression Loss
+
+The optimization minimizes person detection confidence while maintaining gradient flow through the detector.
+
+---
+
+## Expectation over Transformation (EOT)
+
+Current transformations include:
+
+- Rotation
+- Scaling
+
+The framework is designed for additional physical-world transformations.
+
+---
+
+## Training Engine
+
+The trainer supports:
+
+- Multi-epoch optimization
+- Random patch placement
+- Automatic gradient computation
+- Adam optimizer
+- Cosine learning rate scheduling
+- Epoch logging
+- Patch statistics
+- Automatic checkpoint saving
+- CSV loss logging
+
+---
+
+# Evaluation Framework
+
+The repository includes a complete evaluation pipeline.
+
+Features:
+
+- Original image inference
+- Patched image inference
+- Detection comparison
+- Suppression metrics
+- Confidence statistics
+- Annotated visualizations
+- Side-by-side comparison images
+- CSV export
+- JSON export
+
+Example output:
+
+```text
+Original Persons : 3
+Patched Persons  : 2
+
+Suppression Rate : 33.33%
+
+Confidence Drop  : 21.48%
+
+Retention Rate   : 66.67%
+```
+
+---
+
+# Training
+
+Run training:
+
+```bash
+python train.py
+```
+
+---
+
+# Evaluation
+
+Run evaluation:
+
+```bash
+python -m evaluation.evaluate_patch
+```
+
+Generated outputs:
+
+```text
 outputs/
-│
+
 ├── checkpoints/
 ├── figures/
+│   ├── original_detection.jpg
+│   ├── patched_detection.jpg
+│   └── comparison.jpg
+│
 ├── logs/
+│   ├── loss_history.csv
+│   ├── results.csv
+│   └── results.json
+│
 └── patches/
 ```
 
 ---
 
-# Current Milestone
+# Current Progress
 
-## Commit 12: Detector-Aware Suppression Loss
+| Component | Status |
+|-----------|--------|
+| Configuration System | ✅ |
+| COCO Dataset Loader | ✅ |
+| YOLOv8 Integration | ✅ |
+| Detection Parser | ✅ |
+| Adversarial Patch | ✅ |
+| Patch Application | ✅ |
+| Random Patch Placement | ✅ |
+| Attack Target Extraction | ✅ |
+| Person Suppression Loss | ✅ |
+| EOT (Rotation + Scaling) | ✅ |
+| Multi-Epoch Training | ✅ |
+| Checkpoint Saving | ✅ |
+| Loss Logging | ✅ |
+| Patch Initialization Strategies | ✅ |
+| Cosine LR Scheduler | ✅ |
+| Evaluation Framework | ✅ |
+| Visualization | ✅ |
+| CSV / JSON Export | ✅ |
 
-### Objective
+---
 
-Implemented a detector-aware optimization objective for adversarial patch training.
+# Roadmap
 
-### Changes
+Upcoming improvements include:
 
-- Added `AttackTarget` module to extract target class confidence scores from YOLOv8 predictions.
-- Implemented `person_suppression_loss()` to minimize person detection confidence.
-- Replaced the placeholder baseline loss with detector-aware suppression loss.
-- Added confidence statistics during training:
-  - Mean Target Confidence
-  - Maximum Target Confidence
-  - Minimum Target Confidence
-- Added gradient flow verification.
-- Added patch clamping after each optimizer step to keep pixel values within the valid image range `[0,1]`.
-- Added checkpoint saving and loss history logging.
-
-### Training Status
-
-Current pipeline:
-
-Input Image
-↓
-Adversarial Patch
-↓
-Patch Application
-↓
-YOLOv8 Detector
-↓
-Target Score Extraction
-↓
-Suppression Loss
-↓
-Backpropagation
-↓
-Patch Update
-
-# Future Milestones
-
-- **Commit 13**
-  - Expectation over Transformation (EOT)
-
-- **Commit 14**
-  - Physical Attack Enhancements
+- Best checkpoint selection
+- Training loss visualization
+- Multi-image optimization
+- Multi-image evaluation
+- Stronger EOT transformations
+- Physical-world adversarial evaluation
+- Patch robustness benchmarking
+- Attack Success Rate (ASR)
+- Detector transferability experiments
 
 ---
 
@@ -179,32 +327,31 @@ Patch Update
 - Ultralytics YOLOv8
 - OpenCV
 - NumPy
+- PyYAML
 
 ---
 
-## Evaluation Pipeline
-
-The repository includes a complete evaluation framework.
-
-Features
-
-- Original image inference
-- Patched image inference
-- Detection suppression metrics
-- Confidence statistics
-- Annotated detection visualizations
-- Side-by-side comparison generation
-- CSV export
-- JSON export
-
-Example
-
-Original detections : 3
-Patched detections  : 2
-Suppression Rate    : 33.33%
-
 # Project Status
 
-**Current Stage:** Stage A — Differentiable Optimization Pipeline ✅
+**Current Stage:** Research Prototype (Commit 20)
 
-The repository now supports end-to-end differentiable optimization of adversarial patches. Upcoming milestones focus on scalable training, detector-specific attack objectives, and physical robustness.
+The repository now implements a complete end-to-end differentiable adversarial patch optimization pipeline with configurable initialization strategies, expectation over transformation, cosine learning rate scheduling, and a comprehensive evaluation framework.
+
+Future work will focus on improving attack robustness, scaling training to larger datasets, and evaluating physical-world performance.
+
+---
+
+# Author
+
+**Rishab Shetty**
+
+Computer Science (AI & ML)
+
+PES University
+
+Research Interests:
+
+- Adversarial Machine Learning
+- Computer Vision
+- Deep Learning
+- AI Security

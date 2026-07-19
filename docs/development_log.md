@@ -543,3 +543,387 @@ Replace the placeholder optimization objective with a detector-aware suppression
 ## Status
 
 Stable training pipeline achieved.
+
+---
+
+# Commit 13
+
+## Expectation over Transformation (EOT)
+
+### Objective
+
+Improve the robustness of adversarial patch optimization by introducing Expectation over Transformation (EOT), allowing the patch to be optimized under varying image transformations.
+
+### Implemented
+
+- Added EOT module (`attack/eot.py`)
+- Rotation transformation
+- Scaling transformation
+- Configuration-driven augmentation
+- Differentiable transformation pipeline
+
+### Files
+
+- attack/eot.py
+- attack/configs/default.yaml
+- attack/trainer.py
+
+### Validation
+
+Verified:
+
+- Rotation applied successfully
+- Scaling applied successfully
+- Gradient propagation preserved
+- Training remained stable
+
+### Status
+
+✅ Completed
+
+---
+
+# Commit 14
+
+## Random Patch Placement
+
+### Objective
+
+Improve attack generalization by placing the adversarial patch at random valid locations during training instead of using a fixed position.
+
+### Implemented
+
+- Random patch position generator
+- Automatic boundary checking
+- Dynamic patch placement every training iteration
+
+### Files
+
+- attack/trainer.py
+
+### Validation
+
+Verified:
+
+- Random coordinates generated every iteration
+- Patch remained within image boundaries
+- Training completed successfully
+
+### Status
+
+✅ Completed
+
+---
+
+# Commit 15
+
+## Confidence-Weighted Person Suppression
+
+### Objective
+
+Improve optimization by focusing on the most confident person detections instead of treating all detections equally.
+
+### Implemented
+
+- Confidence-weighted suppression objective
+- Improved detector-aware optimization
+- Stable gradient propagation
+
+### Files
+
+- attack/losses.py
+- attack/trainer.py
+
+### Validation
+
+Verified:
+
+- Stable optimization
+- Reduced person confidence
+- Successful gradient computation
+
+### Status
+
+✅ Completed
+
+---
+
+# Commit 16
+
+## Top-K Target Selection
+
+### Objective
+
+Restrict optimization to the highest-confidence detections, improving efficiency and stability.
+
+### Implemented
+
+- Configurable Top-K target extraction
+- Batch-wise confidence selection
+- Detector-independent target interface
+
+### Files
+
+- attack/attack_target.py
+- attack/configs/default.yaml
+
+### Validation
+
+Verified:
+
+- Correct Top-K extraction
+- Stable tensor shapes
+- Successful optimization
+
+### Status
+
+✅ Completed
+
+---
+
+# Commit 17
+
+## Evaluation Framework
+
+### Objective
+
+Develop a comprehensive evaluation framework for comparing detector performance before and after adversarial patch application.
+
+### Implemented
+
+- Original image inference
+- Patched image inference
+- Detection comparison
+- Detection visualization
+- Side-by-side comparison generation
+
+### Added
+
+- Evaluation metrics
+- Detection statistics
+- Annotated outputs
+
+### Files
+
+- evaluation/evaluate_patch.py
+- evaluation/visualization.py
+
+### Validation
+
+Successfully generated:
+
+- Original detection visualization
+- Patched detection visualization
+- Comparison image
+
+### Status
+
+✅ Completed
+
+---
+
+# Commit 18
+
+## Enhanced Evaluation Metrics and Export
+
+### Objective
+
+Extend the evaluation pipeline with quantitative metrics and export functionality.
+
+### Implemented
+
+- Detection suppression rate
+- Confidence drop metric
+- Detection retention metric
+- CSV export
+- JSON export
+- Evaluation summary printing
+
+### Files
+
+- evaluation/metrics.py
+- evaluation/export.py
+- evaluation/evaluate_patch.py
+
+### Validation
+
+Successfully exported:
+
+- results.csv
+- results.json
+
+Example output:
+
+Original Persons : 3
+
+Patched Persons : 3
+
+Suppression Rate : 0%
+
+Confidence Drop : 0%
+
+Retention Rate : 100%
+
+### Status
+
+✅ Completed
+
+---
+
+# Commit 19
+
+## Configurable Patch Initialization
+
+### Objective
+
+Provide multiple initialization strategies for the learnable adversarial patch to support experimentation.
+
+### Implemented
+
+Added four initialization strategies:
+
+- Gray
+- Random
+- Checkerboard
+- Gaussian
+
+Implemented modular initialization functions.
+
+Improved validation and error handling.
+
+### Files
+
+- attack/patch.py
+
+### Validation
+
+Verified all initialization modes.
+
+Example statistics:
+
+Gray
+
+Mean : 0.5000
+
+Std : 0.0000
+
+Random
+
+Mean : 0.5018
+
+Std : 0.2887
+
+Checkerboard
+
+Mean : 0.5000
+
+Std : 0.5000
+
+Gaussian
+
+Mean : 0.4640
+
+Std : 0.1137
+
+### Status
+
+✅ Completed
+
+---
+
+# Commit 20
+
+## Cosine Learning Rate Scheduler
+
+### Objective
+
+Improve optimization stability by introducing learning rate scheduling during adversarial patch training.
+
+### Implemented
+
+- Configurable scheduler section in YAML
+- CosineAnnealingLR integration
+- Scheduler support inside the training engine
+- Learning rate logging after every epoch
+
+### Files
+
+- train.py
+- attack/trainer.py
+- attack/configs/default.yaml
+
+### Validation
+
+Successfully verified cosine decay:
+
+Epoch 1
+
+Learning Rate : 0.030000
+
+↓
+
+Epoch 25
+
+Learning Rate : 0.015000
+
+↓
+
+Epoch 50
+
+Learning Rate : 0.000100
+
+Training completed successfully while preserving:
+
+- Gradient propagation
+- Checkpoint saving
+- Loss history logging
+
+### Status
+
+✅ Completed
+
+---
+
+# Current Progress
+
+## Completed
+
+- Configuration Management
+- Utility Module
+- Adversarial Patch Module
+- COCO Dataset Loader
+- Patch Application
+- YOLOv8 Detector Wrapper
+- Detection Parser
+- Loss Function Framework
+- Differentiable Optimization Pipeline
+- Multi-Epoch Training
+- Person Suppression Objective
+- Expectation over Transformation (EOT)
+- Random Patch Placement
+- Confidence-Weighted Optimization
+- Top-K Target Selection
+- Evaluation Framework
+- Evaluation Metrics
+- CSV / JSON Export
+- Multiple Patch Initialization Strategies
+- Cosine Learning Rate Scheduler
+
+---
+
+# Upcoming Milestones
+
+- Commit 21 — Best Checkpoint Selection
+- Commit 22 — Training Loss Visualization
+- Commit 23 — Multi-Image Training
+- Commit 24 — Multi-Image Evaluation
+- Commit 25 — Enhanced EOT Transformations
+- Commit 26 — Physical Robustness Experiments
+
+---
+
+# Project Status
+
+**Current Stage:** Commit 20 — End-to-End Adversarial Patch Training Framework
+
+The repository now provides a complete research-oriented framework for training and evaluating adversarial patches against YOLOv8. It includes configurable optimization, expectation over transformation, quantitative evaluation, multiple initialization strategies, and a modular architecture designed for future research in physical adversarial attacks.
