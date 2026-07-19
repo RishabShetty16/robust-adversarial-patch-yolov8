@@ -71,7 +71,7 @@ logging:
   evaluate_every: 50
 
 training:
-  epochs: 20
+  epochs: 50
   batch_size: 4
   num_workers: 0
   save_every: 5

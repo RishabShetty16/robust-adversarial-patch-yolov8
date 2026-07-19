@@ -79,32 +79,32 @@ def main():
 
     print("✓ Patch Applier Initialized")
 
+    import glob
+    import os
+
     # --------------------------------------------------
-    # Load Trained Checkpoint
+    # Load Latest Checkpoint
     # --------------------------------------------------
 
-    checkpoint_path = "outputs/checkpoints/epoch_020.pt"
+    checkpoint_files = sorted(
+        glob.glob("outputs/checkpoints/epoch_*.pt")
+    )
+
+    if not checkpoint_files:
+        raise FileNotFoundError("No checkpoints found.")
+
+    checkpoint_path = checkpoint_files[-1]
 
     checkpoint = torch.load(
         checkpoint_path,
         map_location="cpu",
     )
 
-    patch.load_state_dict(
-        checkpoint["patch"]
-    )
+    patch.load_state_dict(checkpoint["patch"])
 
     print("✓ Checkpoint Loaded")
+    print("Checkpoint File :", os.path.basename(checkpoint_path))
     print(f"Checkpoint Epoch : {checkpoint['epoch']}")
-
-    print()
-    print("Patch Statistics")
-
-    stats = patch.statistics()
-
-    for key, value in stats.items():
-        print(f"{key:>8} : {value}")
-
     # ==================================================
     # Load Evaluation Image
     # ==================================================

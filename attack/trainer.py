@@ -70,6 +70,32 @@ class PatchTrainer:
         self.loss_history = []
 
     # -------------------------------------------------
+    # Random Patch Placement
+    # -------------------------------------------------
+
+    def random_patch_position(self, image, patch):
+        """
+        Generate a random valid patch location.
+        """
+
+        _, _, image_h, image_w = image.shape
+        _, patch_h, patch_w = patch.shape
+
+        x = torch.randint(
+            low=0,
+            high=image_w - patch_w + 1,
+            size=(1,),
+        ).item()
+
+        y = torch.randint(
+            low=0,
+            high=image_h - patch_h + 1,
+            size=(1,),
+        ).item()
+
+        return x, y
+
+    # -------------------------------------------------
     # Main Training Loop
     # -------------------------------------------------
 
@@ -98,10 +124,6 @@ class PatchTrainer:
             self.log_metrics(epoch, average_loss)
 
             self.save_checkpoint(epoch)
-
-        # -------------------------------------------------
-        # Save complete loss history after training
-        # -------------------------------------------------
 
         self.save_loss_history()
 
@@ -137,33 +159,36 @@ class PatchTrainer:
 
         print("Batch Shape :", image.shape)
 
-        # -------------------------------------------------
-
         patch = self.patch()
 
         print("Patch Shape :", patch.shape)
 
         # -------------------------------------------------
+        # Random Patch Position
+        # -------------------------------------------------
+
+        x, y = self.random_patch_position(
+            image,
+            patch,
+        )
+
+        print(f"Patch Position : ({x}, {y})")
 
         patched = self.patch_applier.apply(
             image=image,
             patch=patch,
-            x=100,
-            y=100,
+            x=x,
+            y=y,
         )
 
         print("Patched Batch Shape :", patched.shape)
 
         print("=" * 60)
 
-        # -------------------------------------------------
-
         outputs = self.detector.forward(patched)
 
         print()
         print("Forward Pass Successful")
-
-        # -------------------------------------------------
 
         targets = self.attack_target.extract(outputs)
 
@@ -171,13 +196,10 @@ class PatchTrainer:
 
         print("Target Scores Shape :", target_scores.shape)
 
-        # Sanity check
         assert target_scores.ndim == 2, (
             f"Expected target_scores shape (B, N), "
             f"got {target_scores.shape}"
         )
-
-        # -------------------------------------------------
 
         loss = person_suppression_loss(target_scores)
 
@@ -197,9 +219,6 @@ class PatchTrainer:
             f"Min Target Confidence  : {target_scores.min().item():.6f}"
         )
 
-        # -------------------------------------------------
-        # -------------------------------------------------
-
         self.optimizer.zero_grad()
 
         loss.backward()
@@ -212,10 +231,6 @@ class PatchTrainer:
 
         self.optimizer.step()
 
-        # -------------------------------------------------
-        # Keep patch values in valid image range [0, 1]
-        # -------------------------------------------------
-
         with torch.no_grad():
             self.patch.patch.clamp_(
                 self.cfg["patch"]["clamp_min"],
@@ -224,21 +239,15 @@ class PatchTrainer:
 
         print()
         print("Patch Mean :", self.patch().mean().item())
-        print(
-            "Patch Min  :",
-            self.patch().min().item(),
-        )
-        print(
-            "Patch Max  :",
-            self.patch().max().item(),
-        )
+        print("Patch Min  :", self.patch().min().item())
+        print("Patch Max  :", self.patch().max().item())
 
         print()
         print("Optimizer Step Completed")
         print("=" * 60)
 
         return loss
-    
+
     # -------------------------------------------------
     # Logging
     # -------------------------------------------------

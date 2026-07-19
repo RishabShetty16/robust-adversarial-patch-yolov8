@@ -7,24 +7,23 @@ Author:
     Rishab Shetty
 """
 
+PERSON_CLASS = 0
 
-def extract_confidences(result):
+
+def extract_person_confidences(result):
     """
-    Extract confidence scores from YOLO detections.
-
-    Parameters
-    ----------
-    result
-        Ultralytics detection result.
-
-    Returns
-    -------
-    list[float]
+    Extract confidence scores for PERSON detections only.
     """
 
     confidences = []
 
     for box in result.boxes:
+
+        class_id = int(box.cls.item())
+
+        if class_id != PERSON_CLASS:
+            continue
+
         confidences.append(float(box.conf.item()))
 
     return confidences
@@ -32,19 +31,10 @@ def extract_confidences(result):
 
 def compute_metrics(result):
     """
-    Compute basic detection statistics.
-
-    Parameters
-    ----------
-    result
-        Ultralytics detection result.
-
-    Returns
-    -------
-    dict
+    Compute statistics for PERSON detections only.
     """
 
-    confidences = extract_confidences(result)
+    confidences = extract_person_confidences(result)
 
     metrics = {
         "count": len(confidences),
@@ -53,7 +43,7 @@ def compute_metrics(result):
         "minimum": 0.0,
     }
 
-    if confidences:
+    if len(confidences) > 0:
 
         metrics["average"] = sum(confidences) / len(confidences)
         metrics["maximum"] = max(confidences)
@@ -64,16 +54,7 @@ def compute_metrics(result):
 
 def compute_suppression(original, patched):
     """
-    Compute detection suppression percentage.
-
-    Parameters
-    ----------
-    original : dict
-    patched : dict
-
-    Returns
-    -------
-    float
+    Compute person detection suppression percentage.
     """
 
     if original["count"] == 0:
@@ -87,14 +68,14 @@ def compute_suppression(original, patched):
 
 def print_metrics(title, metrics):
     """
-    Pretty print metrics.
+    Pretty-print person detection statistics.
     """
 
     print("=" * 60)
     print(title)
     print("=" * 60)
 
-    print(f"Persons            : {metrics['count']}")
+    print(f"Person Detections  : {metrics['count']}")
     print(f"Average Confidence : {metrics['average']:.4f}")
     print(f"Maximum Confidence : {metrics['maximum']:.4f}")
     print(f"Minimum Confidence : {metrics['minimum']:.4f}")
