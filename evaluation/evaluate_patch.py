@@ -7,18 +7,27 @@ Author:
     Rishab Shetty
 """
 
+import glob
+import os
 import torch
+
 from evaluation.metrics import (
     compute_metrics,
     compute_suppression,
+    compute_confidence_drop,
+    compute_retention,
     print_metrics,
+    print_summary,
 )
+
 from evaluation.export import (
     export_csv,
     export_json,
 )
+
 from evaluation.comparison import create_comparison
 from evaluation.visualization import save_detection_image
+
 from attack.config import load_config
 from attack.detector import YOLODetector
 from attack.patch import AdversarialPatch
@@ -32,9 +41,9 @@ def main():
     print("Patch Evaluation")
     print("=" * 60)
 
-    # --------------------------------------------------
-    # Load Config
-    # --------------------------------------------------
+    # ==================================================
+    # Load Configuration
+    # ==================================================
 
     cfg = load_config(
         "attack/configs/default.yaml"
@@ -42,25 +51,25 @@ def main():
 
     print("✓ Configuration Loaded")
 
-    # --------------------------------------------------
+    # ==================================================
     # Dataset
-    # --------------------------------------------------
+    # ==================================================
 
     dataset = COCODataset(cfg)
 
     print("✓ Dataset Loaded")
 
-    # --------------------------------------------------
+    # ==================================================
     # Detector
-    # --------------------------------------------------
+    # ==================================================
 
     detector = YOLODetector(cfg)
 
     print("✓ Detector Loaded")
 
-    # --------------------------------------------------
+    # ==================================================
     # Patch
-    # --------------------------------------------------
+    # ==================================================
 
     patch = AdversarialPatch(
         size=cfg["patch"]["size"],
@@ -71,20 +80,17 @@ def main():
 
     print("✓ Patch Initialized")
 
-    # --------------------------------------------------
+    # ==================================================
     # Patch Applier
-    # --------------------------------------------------
+    # ==================================================
 
     patch_applier = PatchApplier()
 
     print("✓ Patch Applier Initialized")
 
-    import glob
-    import os
-
-    # --------------------------------------------------
+    # ==================================================
     # Load Latest Checkpoint
-    # --------------------------------------------------
+    # ==================================================
 
     checkpoint_files = sorted(
         glob.glob("outputs/checkpoints/epoch_*.pt")
@@ -105,6 +111,7 @@ def main():
     print("✓ Checkpoint Loaded")
     print("Checkpoint File :", os.path.basename(checkpoint_path))
     print(f"Checkpoint Epoch : {checkpoint['epoch']}")
+
     # ==================================================
     # Load Evaluation Image
     # ==================================================
@@ -124,7 +131,7 @@ def main():
     print("Batch Shape :", image.shape)
 
     # ==================================================
-    # YOLO Detection (Original Image)
+    # Original Detection
     # ==================================================
 
     print()
@@ -134,9 +141,9 @@ def main():
 
     results = detector.predict(image)
 
-    print("✓ Detection Completed")
-
     result = results[0]
+
+    print("✓ Detection Completed")
 
     print()
     print("=" * 60)
@@ -145,25 +152,19 @@ def main():
 
     print("Boxes Found :", len(result.boxes))
 
-    if len(result.boxes) == 0:
+    for i, box in enumerate(result.boxes):
 
-        print("No detections found.")
+        cls = int(box.cls.item())
+        conf = float(box.conf.item())
 
-    else:
-
-        for i, box in enumerate(result.boxes):
-
-            cls = int(box.cls.item())
-            conf = float(box.conf.item())
-
-            print(
-                f"Detection {i + 1}: "
-                f"Class={cls}, "
-                f"Confidence={conf:.4f}"
-            )
+        print(
+            f"Detection {i+1}: "
+            f"Class={cls}, "
+            f"Confidence={conf:.4f}"
+        )
 
     # ==================================================
-    # Apply Trained Patch
+    # Apply Patch
     # ==================================================
 
     print()
@@ -179,10 +180,9 @@ def main():
     )
 
     print("✓ Patch Applied")
-    print("Patched Image Shape :", patched_image.shape)
 
     # ==================================================
-    # YOLO Detection (Patched Image)
+    # Patched Detection
     # ==================================================
 
     print()
@@ -194,9 +194,9 @@ def main():
         patched_image
     )
 
-    print("✓ Detection Completed")
-
     patched_result = patched_results[0]
+
+    print("✓ Detection Completed")
 
     print()
     print("=" * 60)
@@ -205,36 +205,44 @@ def main():
 
     print("Boxes Found :", len(patched_result.boxes))
 
-    if len(patched_result.boxes) == 0:
+    for i, box in enumerate(patched_result.boxes):
 
-        print("No detections found.")
+        cls = int(box.cls.item())
+        conf = float(box.conf.item())
 
-    else:
-
-        for i, box in enumerate(patched_result.boxes):
-
-            cls = int(box.cls.item())
-            conf = float(box.conf.item())
-
-            print(
-                f"Detection {i + 1}: "
-                f"Class={cls}, "
-                f"Confidence={conf:.4f}"
-            )
+        print(
+            f"Detection {i+1}: "
+            f"Class={cls}, "
+            f"Confidence={conf:.4f}"
+        )
 
     # ==================================================
     # Metrics
     # ==================================================
 
     original_metrics = compute_metrics(result)
-    patched_metrics = compute_metrics(patched_result)
+
+    patched_metrics = compute_metrics(
+        patched_result
+    )
 
     suppression = compute_suppression(
         original_metrics,
         patched_metrics,
     )
 
+    confidence_drop = compute_confidence_drop(
+        original_metrics,
+        patched_metrics,
+    )
+
+    retention = compute_retention(
+        original_metrics,
+        patched_metrics,
+    )
+
     print()
+
     print_metrics(
         "Original Metrics",
         original_metrics,
@@ -245,10 +253,13 @@ def main():
         patched_metrics,
     )
 
-    print("=" * 60)
-    print("Evaluation Summary")
-    print("=" * 60)
-    print(f"Suppression Rate : {suppression:.2f}%")
+    print_summary(
+        original_metrics,
+        patched_metrics,
+        suppression,
+        confidence_drop,
+        retention,
+    )
 
     # ==================================================
     # Save Detection Images
@@ -270,7 +281,7 @@ def main():
     )
 
     # ==================================================
-    # Create Comparison Image
+    # Comparison Image
     # ==================================================
 
     print()
@@ -297,6 +308,8 @@ def main():
         original_metrics,
         patched_metrics,
         suppression,
+        confidence_drop,
+        retention,
         "outputs/evaluation/results.csv",
     )
 
@@ -304,11 +317,15 @@ def main():
         original_metrics,
         patched_metrics,
         suppression,
+        confidence_drop,
+        retention,
         "outputs/evaluation/results.json",
     )
 
     print()
+    print("=" * 60)
     print("✓ Evaluation Complete")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
