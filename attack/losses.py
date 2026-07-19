@@ -44,21 +44,25 @@ def baseline_loss(predictions: torch.Tensor) -> torch.Tensor:
 
 def person_suppression_loss(
     person_scores: torch.Tensor,
+    threshold: float = 0.25,
 ) -> torch.Tensor:
     """
-    Suppress detections of the target class.
+    Confidence-weighted person suppression loss.
+
+    High-confidence detections contribute much more than
+    low-confidence detections.
 
     Parameters
     ----------
     person_scores : Tensor
         Shape (B, N)
 
+    threshold : float
+        Ignore extremely weak detections.
+
     Returns
     -------
     torch.Tensor
-        Mean confidence of all person predictions.
-
-    Lower is better.
     """
 
     if person_scores.numel() == 0:
@@ -68,7 +72,23 @@ def person_suppression_loss(
             requires_grad=True,
         )
 
-    return person_scores.mean()
+    # Ignore tiny confidence values
+    mask = person_scores > threshold
+
+    if mask.sum() == 0:
+        return torch.tensor(
+            0.0,
+            device=person_scores.device,
+            requires_grad=True,
+        )
+
+    scores = person_scores[mask]
+
+    # Square confidences so high-confidence detections
+    # dominate the optimization.
+    loss = (scores ** 2).mean()
+
+    return loss
 
 
 # ==========================================================

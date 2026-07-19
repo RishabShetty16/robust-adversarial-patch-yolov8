@@ -60,32 +60,37 @@ class AttackTarget:
         YOLOv8 Output
         ------------
         predictions : (B, 84, N)
-
-        Channels
-        --------
-        0:4   -> Bounding boxes
-        4:84  -> Class scores
         """
 
         predictions = outputs[0]
 
-        # Bounding boxes
         boxes = predictions[:, :4, :]
 
-        # All class scores
         class_scores = predictions[:, 4:, :]
 
-        # Target class scores
         target_scores = class_scores[:, self.target_class, :]
+
+        # -------------------------------------------------
+        # Top-K Target Selection
+        # -------------------------------------------------
+
+        top_k = self.cfg["attack"].get("top_k", 50)
+
+        k = min(top_k, target_scores.shape[1])
+
+        top_scores, _ = target_scores.topk(
+            k=k,
+            dim=1,
+        )
 
         return {
             "predictions": predictions,
             "boxes": boxes,
             "class_scores": class_scores,
-            "target_scores": target_scores,
-            "person_scores": target_scores,   # backward compatibility
+            "target_scores": top_scores,
+            "person_scores": top_scores,
         }
-
+    
     def __repr__(self):
 
         return (

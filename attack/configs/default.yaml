@@ -41,6 +41,7 @@ optimizer:
 attack:
   mode: suppression
   target_class: person
+  top_k: 50
 
 placement:
   mode: fixed
