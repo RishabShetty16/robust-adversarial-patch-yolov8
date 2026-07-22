@@ -59,3 +59,8 @@ outputs/
 # =====================================================
 .DS_Store
 Thumbs.db
+
+# COCO dataset
+val2017.zip
+val2017/
+data/coco/images/

@@ -10,10 +10,11 @@ dataset:
   images: images
   labels: labels
   image_size: 640
+  max_images: 100
   batch_size: 8
   shuffle: true
   workers: 4
-
+  
 model:
   weights: yolov8n.pt
   device: auto

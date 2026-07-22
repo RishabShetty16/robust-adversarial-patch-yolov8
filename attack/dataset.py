@@ -47,6 +47,11 @@ class COCODataset(Dataset):
             list(self.image_dir.glob("*.jpeg"))
         )
 
+        max_images = dataset_cfg.get("max_images")
+
+        if max_images is not None:
+            self.image_paths = self.image_paths[:max_images]
+
         # Image preprocessing
         self.transform = transforms.Compose([
             transforms.Resize((self.image_size, self.image_size)),
