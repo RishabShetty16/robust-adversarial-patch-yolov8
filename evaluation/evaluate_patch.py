@@ -89,28 +89,53 @@ def main():
     print("✓ Patch Applier Initialized")
 
     # ==================================================
-    # Load Latest Checkpoint
+    # Load Best Checkpoint
     # ==================================================
 
-    checkpoint_files = sorted(
-        glob.glob("outputs/checkpoints/epoch_*.pt")
-    )
+    best_checkpoint = "outputs/checkpoints/best.pt"
 
-    if not checkpoint_files:
-        raise FileNotFoundError("No checkpoints found.")
+    if os.path.exists(best_checkpoint):
 
-    checkpoint_path = checkpoint_files[-1]
+        checkpoint_path = best_checkpoint
+
+        print("✓ Best Checkpoint Found")
+
+    else:
+
+        checkpoint_files = sorted(
+            glob.glob("outputs/checkpoints/epoch_*.pt")
+        )
+
+        if not checkpoint_files:
+            raise FileNotFoundError(
+                "No checkpoints found."
+            )
+
+        checkpoint_path = checkpoint_files[-1]
+
+        print("Best checkpoint not found.")
+        print("Using latest epoch checkpoint.")
 
     checkpoint = torch.load(
         checkpoint_path,
         map_location="cpu",
     )
 
-    patch.load_state_dict(checkpoint["patch"])
+    patch.load_state_dict(
+        checkpoint["patch"]
+    )
 
-    print("✓ Checkpoint Loaded")
-    print("Checkpoint File :", os.path.basename(checkpoint_path))
-    print(f"Checkpoint Epoch : {checkpoint['epoch']}")
+    print()
+    print("=" * 60)
+    print("Checkpoint Loaded")
+    print("=" * 60)
+    print("File :", os.path.basename(checkpoint_path))
+    print(f"Epoch : {checkpoint['epoch']}")
+
+    if "best_loss" in checkpoint:
+        print(f"Best Loss : {checkpoint['best_loss']:.6f}")
+
+    print("=" * 60)
 
     # ==================================================
     # Load Evaluation Image

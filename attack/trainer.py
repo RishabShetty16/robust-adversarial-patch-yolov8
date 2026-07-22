@@ -73,6 +73,12 @@ class PatchTrainer:
 
         self.loss_history = []
 
+        # -------------------------------------------------
+        # Best Checkpoint Tracking
+        # -------------------------------------------------
+
+        self.best_loss = float("inf")
+
     # -------------------------------------------------
     # Random Patch Placement
     # -------------------------------------------------
@@ -130,6 +136,10 @@ class PatchTrainer:
 
             self.log_metrics(epoch, average_loss)
 
+            # Save the best checkpoint if loss improves
+            self.save_best_checkpoint(epoch, average_loss)
+
+            # Save periodic checkpoints
             self.save_checkpoint(epoch)
 
         self.save_loss_history()
@@ -314,6 +324,48 @@ class PatchTrainer:
 
         print()
         print(f"Checkpoint Saved : {checkpoint_path}")
+
+    # -------------------------------------------------
+    # Save Best Checkpoint
+    # -------------------------------------------------
+
+    def save_best_checkpoint(self, epoch, average_loss):
+        """
+        Save the best-performing checkpoint based on the
+        lowest average training loss.
+        """
+
+        if average_loss >= self.best_loss:
+            return
+
+        self.best_loss = average_loss
+
+        checkpoint_dir = "outputs/checkpoints"
+
+        os.makedirs(checkpoint_dir, exist_ok=True)
+
+        checkpoint_path = os.path.join(
+            checkpoint_dir,
+            "best.pt",
+        )
+
+        torch.save(
+            {
+                "epoch": epoch + 1,
+                "best_loss": average_loss,
+                "patch": self.patch.state_dict(),
+                "optimizer": self.optimizer.state_dict(),
+            },
+            checkpoint_path,
+        )
+
+        print()
+        print("=" * 60)
+        print("✓ New Best Checkpoint Saved")
+        print(f"Epoch     : {epoch + 1}")
+        print(f"Best Loss : {average_loss:.6f}")
+        print(f"Saved To  : {checkpoint_path}")
+        print("=" * 60)
 
     # -------------------------------------------------
     # Save Loss History
