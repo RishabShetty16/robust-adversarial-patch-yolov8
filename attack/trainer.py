@@ -23,6 +23,7 @@ import os
 import csv
 import torch
 
+import matplotlib.pyplot as plt
 from attack.eot import EOT
 from torch.utils.data import DataLoader
 
@@ -143,6 +144,7 @@ class PatchTrainer:
             self.save_checkpoint(epoch)
 
         self.save_loss_history()
+        self.plot_loss_history()
 
     # -------------------------------------------------
     # Train One Epoch
@@ -397,3 +399,65 @@ class PatchTrainer:
 
         print()
         print(f"Loss History Saved : {log_file}")
+
+    # -------------------------------------------------
+    # Plot Training Loss
+    # -------------------------------------------------
+
+    def plot_loss_history(self):
+        """
+        Plot training loss history and save as an image.
+        """
+
+        figure_dir = "outputs/figures"
+
+        os.makedirs(
+            figure_dir,
+            exist_ok=True,
+        )
+
+        figure_path = os.path.join(
+            figure_dir,
+            "training_loss.png",
+        )
+
+        epochs = list(
+            range(
+                1,
+                len(self.loss_history) + 1,
+            )
+        )
+
+        plt.figure(figsize=(8, 5))
+
+        plt.plot(
+            epochs,
+            self.loss_history,
+            label="Training Loss",
+            linewidth=2,
+        )
+
+        plt.title("Training Loss")
+
+        plt.xlabel("Epoch")
+
+        plt.ylabel("Average Loss")
+
+        plt.grid(True)
+
+        plt.legend()
+
+        plt.tight_layout()
+
+        plt.savefig(
+            figure_path,
+            dpi=300,
+        )
+
+        plt.close()
+
+        print()
+        print("=" * 60)
+        print("Training Loss Plot Saved")
+        print(figure_path)
+        print("=" * 60)
