@@ -19,6 +19,7 @@ Author:
 from __future__ import annotations
 
 import torch
+from attack.printable_colors import PRINTABLE_COLORS
 
 
 # ==========================================================
@@ -162,15 +163,36 @@ def non_printability_score(
     patch: torch.Tensor,
 ) -> torch.Tensor:
     """
-    Placeholder for the Non-Printability
-    Score (NPS).
+    Differentiable Non-Printability Score (NPS).
+
+    Encourages patch colors to remain close
+    to a predefined printable color palette.
     """
 
-    return torch.tensor(
-        0.0,
-        device=patch.device,
+    printable = PRINTABLE_COLORS.to(
+        patch.device
     )
 
+    # (3,H,W) -> (H*W,3)
+    pixels = patch.permute(
+        1,
+        2,
+        0,
+    ).reshape(-1, 3)
+
+    # Distance from every pixel to every printable color
+    distances = torch.cdist(
+        pixels,
+        printable,
+        p=2,
+    )
+
+    # Nearest printable color
+    min_distance = distances.min(
+        dim=1
+    ).values
+
+    return min_distance.mean()
 
 # ==========================================================
 # Test
