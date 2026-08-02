@@ -45,7 +45,7 @@ loss:
   nps_weight: 0.001
 
 placement:
-  mode: fixed
+  mode: center
   x: 100
   y: 100
 

@@ -33,6 +33,7 @@ from attack.losses import (
     non_printability_score,
 )
 from attack.attack_target import AttackTarget
+from attack.placement import get_patch_position
 
 
 class PatchTrainer:
@@ -83,32 +84,6 @@ class PatchTrainer:
         # -------------------------------------------------
 
         self.best_loss = float("inf")
-
-    # -------------------------------------------------
-    # Random Patch Placement
-    # -------------------------------------------------
-
-    def random_patch_position(self, image, patch):
-        """
-        Generate a random valid patch location.
-        """
-
-        _, _, image_h, image_w = image.shape
-        _, patch_h, patch_w = patch.shape
-
-        x = torch.randint(
-            low=0,
-            high=image_w - patch_w + 1,
-            size=(1,),
-        ).item()
-
-        y = torch.randint(
-            low=0,
-            high=image_h - patch_h + 1,
-            size=(1,),
-        ).item()
-
-        return x, y
 
     # -------------------------------------------------
     # Main Training Loop
@@ -190,10 +165,15 @@ class PatchTrainer:
         # -------------------------------------------------
         # Random Patch Position
         # -------------------------------------------------
+        _, _, image_h, image_w = image.shape
 
-        x, y = self.random_patch_position(
-            image,
-            patch,
+        patch_size = patch.shape[-1]
+
+        x, y = get_patch_position(
+            image_height=image_h,
+            image_width=image_w,
+            patch_size=patch_size,
+            placement_cfg=self.cfg["placement"],
         )
 
         print(f"Patch Position : ({x}, {y})")
