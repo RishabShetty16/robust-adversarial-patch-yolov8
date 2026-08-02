@@ -27,7 +27,11 @@ import matplotlib.pyplot as plt
 from attack.eot import EOT
 from torch.utils.data import DataLoader
 
-from attack.losses import person_suppression_loss
+from attack.losses import (
+    person_suppression_loss,
+    total_variation_loss,
+    non_printability_score,
+)
 from attack.attack_target import AttackTarget
 
 
@@ -221,10 +225,45 @@ class PatchTrainer:
             f"got {target_scores.shape}"
         )
 
-        loss = person_suppression_loss(target_scores)
+        # -------------------------------------------------
+        # Composite Loss
+        # -------------------------------------------------
+
+        suppression_loss = person_suppression_loss(
+            target_scores
+        )
+
+        tv_loss = total_variation_loss(
+            self.patch()
+        )
+
+        nps_loss = non_printability_score(
+            self.patch()
+        )
+
+        loss = (
+            self.cfg["loss"]["suppression_weight"] * suppression_loss
+            + self.cfg["loss"]["tv_weight"] * tv_loss
+            + self.cfg["loss"]["nps_weight"] * nps_loss
+        )
 
         print()
-        print("Person Suppression Loss :", loss.item())
+
+        print(
+            f"Suppression Loss : {suppression_loss.item():.6f}"
+        )
+
+        print(
+            f"TV Loss          : {tv_loss.item():.6f}"
+        )
+
+        print(
+            f"NPS Loss         : {nps_loss.item():.6f}"
+        )
+
+        print(
+            f"Total Loss       : {loss.item():.6f}"
+        )
 
         print()
         print(

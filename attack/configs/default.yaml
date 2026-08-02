@@ -39,6 +39,11 @@ attack:
   target_class: person
   top_k: 50
 
+loss:
+  suppression_weight: 1.0
+  tv_weight: 0.01
+  nps_weight: 0.001
+
 placement:
   mode: fixed
   x: 100
