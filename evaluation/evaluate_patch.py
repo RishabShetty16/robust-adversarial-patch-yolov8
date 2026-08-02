@@ -19,6 +19,12 @@ from attack.detector import YOLODetector
 from attack.patch import AdversarialPatch
 from attack.patch_applier import PatchApplier
 from attack.placement import get_patch_position
+from attack.placement import get_patch_position
+
+from attack.bbox_utils import (
+    extract_person_boxes,
+    largest_person_box,
+)
 
 from evaluation.metrics import (
     compute_metrics,
@@ -112,7 +118,6 @@ def evaluate_single_image(
 ):
 
     image = image.unsqueeze(0)
-
     # --------------------------------------------
     # Original Detection
     # --------------------------------------------
@@ -122,19 +127,40 @@ def evaluate_single_image(
     original_result = original_results[0]
 
     # --------------------------------------------
-    # Apply Patch
+    # Detect Persons
     # --------------------------------------------
 
-    _, _, image_height, image_width = image.shape
+    person_boxes = extract_person_boxes(
+        original_result
+    )
+
+    largest_box = largest_person_box(
+        person_boxes
+    )
+
+    print("Largest Person Box :", largest_box)
+
+    # --------------------------------------------
+    # Compute Patch Position
+    # --------------------------------------------
+
+    _, _, image_h, image_w = image.shape
 
     patch_size = patch().shape[-1]
 
     x, y = get_patch_position(
-        image_height=image_height,
-        image_width=image_width,
+        image_height=image_h,
+        image_width=image_w,
         patch_size=patch_size,
         placement_cfg=cfg["placement"],
+        person_box=largest_box,
     )
+
+    print(f"Patch Position : ({x}, {y})")
+
+    # --------------------------------------------
+    # Apply Patch
+    # --------------------------------------------
 
     patched_image = patch_applier.apply(
         image=image,
@@ -142,7 +168,6 @@ def evaluate_single_image(
         x=x,
         y=y,
     )
-
     # --------------------------------------------
     # Patched Detection
     # --------------------------------------------

@@ -21,6 +21,7 @@ def get_patch_position(
     image_width,
     patch_size,
     placement_cfg,
+    person_box=None,
 ):
     """
     Compute the (x, y) position for placing the patch.
@@ -73,6 +74,28 @@ def get_patch_position(
         x = (image_width - patch_size) // 2
 
         y = (image_height - patch_size) // 2
+
+    # -------------------------------------------------
+    # Person Placement
+    # -------------------------------------------------
+
+    elif mode == "person":
+
+        if person_box is None:
+
+            # Fallback to center placement
+            x = (image_width - patch_size) // 2
+            y = (image_height - patch_size) // 2
+
+        else:
+
+            x1, y1, x2, y2 = person_box
+
+            center_x = int((x1 + x2) / 2)
+            center_y = int((y1 + y2) / 2)
+
+            x = center_x - patch_size // 2
+            y = center_y - patch_size // 2
 
     # -------------------------------------------------
     # Unsupported Mode

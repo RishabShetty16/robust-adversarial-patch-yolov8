@@ -45,7 +45,7 @@ loss:
   nps_weight: 0.001
 
 placement:
-  mode: center
+  mode: person
   x: 100
   y: 100
 
@@ -84,7 +84,7 @@ logging:
   evaluate_every: 50
 
 training:
-  epochs: 50
+  epochs: 2
   batch_size: 4
   num_workers: 0
   save_every: 5

@@ -169,6 +169,9 @@ class PatchTrainer:
 
         patch_size = patch.shape[-1]
 
+        # -------------------------------------------------
+        # Detect persons on original image
+        # -------------------------------------------------
         x, y = get_patch_position(
             image_height=image_h,
             image_width=image_w,
