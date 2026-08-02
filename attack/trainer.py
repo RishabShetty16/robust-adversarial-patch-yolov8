@@ -212,8 +212,16 @@ class PatchTrainer:
         # Composite Loss
         # -------------------------------------------------
 
+        # -------------------------------------------------
+        # Suppression Configuration
+        # -------------------------------------------------
+
+        suppression_cfg = self.cfg["loss"]["suppression"]
+
         suppression_loss = person_suppression_loss(
-            target_scores
+            person_scores=target_scores,
+            threshold=suppression_cfg["threshold"],
+            power=suppression_cfg["power"],
         )
 
         tv_loss = total_variation_loss(
@@ -286,6 +294,18 @@ class PatchTrainer:
 
         print(
             f"Min Target Confidence  : {target_scores.min().item():.6f}"
+        )
+
+        print()
+
+        print("Suppression Parameters")
+
+        print(
+            f"Threshold : {suppression_cfg['threshold']}"
+        )
+
+        print(
+            f"Power      : {suppression_cfg['power']}"
         )
 
         # -------------------------------------------------

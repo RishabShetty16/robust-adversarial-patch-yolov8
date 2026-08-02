@@ -43,27 +43,30 @@ def baseline_loss(predictions: torch.Tensor) -> torch.Tensor:
 # Person Suppression Loss
 # ==========================================================
 
+# ==========================================================
+# Person Suppression Loss
+# ==========================================================
+
 def person_suppression_loss(
     person_scores: torch.Tensor,
-    threshold: float = 0.25,
+    threshold: float,
+    power: float,
 ) -> torch.Tensor:
     """
-    Confidence-weighted person suppression loss.
-
-    High-confidence detections contribute much more than
-    low-confidence detections.
+    Confidence-weighted suppression loss.
 
     Parameters
     ----------
     person_scores : Tensor
-        Shape (B, N)
+        Confidence scores of detected persons.
 
     threshold : float
-        Ignore extremely weak detections.
+        Ignore detections below this confidence.
 
-    Returns
-    -------
-    torch.Tensor
+    power : float
+        Confidence exponent.
+        Larger values focus optimization on
+        high-confidence detections.
     """
 
     if person_scores.numel() == 0:
@@ -73,7 +76,7 @@ def person_suppression_loss(
             requires_grad=True,
         )
 
-    # Ignore tiny confidence values
+    # Ignore weak detections
     mask = person_scores > threshold
 
     if mask.sum() == 0:
@@ -85,12 +88,10 @@ def person_suppression_loss(
 
     scores = person_scores[mask]
 
-    # Square confidences so high-confidence detections
-    # dominate the optimization.
-    loss = (scores ** 2).mean()
+    # Confidence-weighted suppression
+    loss = (scores ** power).mean()
 
     return loss
-
 
 # ==========================================================
 # Confidence Loss
@@ -241,7 +242,11 @@ if __name__ == "__main__":
 
     print(
         "Person Suppression Loss :",
-        person_suppression_loss(person_scores).item(),
+        person_suppression_loss(
+            person_scores=person_scores,
+            threshold=0.25,
+            power=2.0,
+        ).item(),
     )
 
     print(

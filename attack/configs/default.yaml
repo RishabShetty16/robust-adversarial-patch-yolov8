@@ -49,6 +49,10 @@ loss:
   tv_weight: 0.0
   nps_weight: 0.001
 
+  suppression:
+    power: 2.0
+    threshold: 0.25
+
 placement:
   mode: person
 
