@@ -22,6 +22,13 @@ if "attack" in cfg:
     if "type" in cfg["attack"]:
         print("Attack     :", cfg["attack"]["type"])
 
+# -----------------------------
+# Evaluation Configuration
+# -----------------------------
+if "evaluation" in cfg:
+    print("Evaluation Images :", cfg["evaluation"]["max_images"])
+    print("Save Visualizations :", cfg["evaluation"]["save_visualizations"])
+
 print("=" * 60)
 
 print(get_device(cfg))

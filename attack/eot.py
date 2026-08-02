@@ -9,7 +9,10 @@ Current Transformations
 -----------------------
 - Random Rotation
 - Random Scaling
-- (Ready for Brightness / Contrast)
+- Random Brightness
+- Random Contrast
+- Gaussian Noise
+- Gaussian Blur
 
 Author:
     Rishab Shetty
@@ -28,8 +31,8 @@ class EOT:
     """
     Expectation Over Transformation (EOT).
 
-    Randomly transforms the adversarial patch during training
-    to improve robustness.
+    Randomly transforms the adversarial patch during
+    training to improve robustness.
     """
 
     def __init__(self, cfg):
@@ -42,38 +45,135 @@ class EOT:
         # Rotation
         # ---------------------------------------------------
 
-        self.rotation_enabled = cfg["eot"]["rotation"]["enabled"]
-        self.max_rotation = cfg["eot"]["rotation"]["degrees"]
+        self.rotation_enabled = (
+            cfg["eot"]["rotation"]["enabled"]
+        )
+
+        self.max_rotation = (
+            cfg["eot"]["rotation"]["degrees"]
+        )
 
         # ---------------------------------------------------
         # Scaling
         # ---------------------------------------------------
 
-        self.scale_enabled = cfg["eot"]["scale"]["enabled"]
+        self.scale_enabled = (
+            cfg["eot"]["scale"]["enabled"]
+        )
 
-        self.min_scale = cfg["eot"]["scale"]["min"]
-        self.max_scale = cfg["eot"]["scale"]["max"]
+        self.min_scale = (
+            cfg["eot"]["scale"]["min"]
+        )
 
-        # ---------------------------------------------------
-        # Brightness (future)
-        # ---------------------------------------------------
-
-        brightness_cfg = cfg["eot"].get("brightness", {})
-
-        self.brightness_enabled = brightness_cfg.get("enabled", False)
-        self.min_brightness = brightness_cfg.get("min", 1.0)
-        self.max_brightness = brightness_cfg.get("max", 1.0)
+        self.max_scale = (
+            cfg["eot"]["scale"]["max"]
+        )
 
         # ---------------------------------------------------
-        # Contrast (future)
+        # Brightness
         # ---------------------------------------------------
 
-        contrast_cfg = cfg["eot"].get("contrast", {})
+        brightness_cfg = cfg["eot"].get(
+            "brightness",
+            {},
+        )
 
-        self.contrast_enabled = contrast_cfg.get("enabled", False)
-        self.min_contrast = contrast_cfg.get("min", 1.0)
-        self.max_contrast = contrast_cfg.get("max", 1.0)
+        self.brightness_enabled = (
+            brightness_cfg.get(
+                "enabled",
+                False,
+            )
+        )
 
+        self.min_brightness = (
+            brightness_cfg.get(
+                "min",
+                1.0,
+            )
+        )
+
+        self.max_brightness = (
+            brightness_cfg.get(
+                "max",
+                1.0,
+            )
+        )
+
+        # ---------------------------------------------------
+        # Contrast
+        # ---------------------------------------------------
+
+        contrast_cfg = cfg["eot"].get(
+            "contrast",
+            {},
+        )
+
+        self.contrast_enabled = (
+            contrast_cfg.get(
+                "enabled",
+                False,
+            )
+        )
+
+        self.min_contrast = (
+            contrast_cfg.get(
+                "min",
+                1.0,
+            )
+        )
+
+        self.max_contrast = (
+            contrast_cfg.get(
+                "max",
+                1.0,
+            )
+        )
+
+        # ---------------------------------------------------
+        # Gaussian Noise
+        # ---------------------------------------------------
+
+        noise_cfg = cfg["eot"].get(
+            "noise",
+            {},
+        )
+
+        self.noise_enabled = (
+            noise_cfg.get(
+                "enabled",
+                False,
+            )
+        )
+
+        self.noise_std = (
+            noise_cfg.get(
+                "std",
+                0.03,
+            )
+        )
+
+        # ---------------------------------------------------
+        # Gaussian Blur
+        # ---------------------------------------------------
+
+        blur_cfg = cfg["eot"].get(
+            "blur",
+            {},
+        )
+
+        self.blur_enabled = (
+            blur_cfg.get(
+                "enabled",
+                False,
+            )
+        )
+
+        self.blur_kernel = (
+            blur_cfg.get(
+                "kernel_size",
+                3,
+            )
+        )
     # -------------------------------------------------------
     # Random Rotation
     # -------------------------------------------------------
@@ -186,6 +286,45 @@ class EOT:
         )
 
     # -------------------------------------------------------
+    # Gaussian Noise
+    # -------------------------------------------------------
+
+    def random_noise(
+        self,
+        patch: torch.Tensor,
+    ) -> torch.Tensor:
+        """
+        Apply Gaussian noise.
+        """
+
+        noise = (
+            torch.randn_like(patch)
+            * self.noise_std
+        )
+
+        patch = patch + noise
+
+        return patch
+
+    # -------------------------------------------------------
+    # Gaussian Blur
+    # -------------------------------------------------------
+
+    def random_blur(
+        self,
+        patch: torch.Tensor,
+    ) -> torch.Tensor:
+        """
+        Apply Gaussian blur.
+        """
+
+        patch = TF.gaussian_blur(
+            patch,
+            kernel_size=self.blur_kernel,
+        )
+
+        return patch
+    # -------------------------------------------------------
     # Apply EOT
     # -------------------------------------------------------
 
@@ -213,14 +352,27 @@ class EOT:
         if self.contrast_enabled:
             patch = self.random_contrast(patch)
 
-        # Keep pixel values valid
+        # Gaussian Noise
+        if self.noise_enabled:
+            patch = self.random_noise(patch)
+
+        # Gaussian Blur
+        if self.blur_enabled:
+            patch = self.random_blur(patch)
+
+        # Keep pixel values within valid range
         patch = patch.clamp(0.0, 1.0)
 
         return patch
 
     # -------------------------------------------------------
+    # String Representation
+    # -------------------------------------------------------
 
     def __repr__(self):
+
+        if not self.enabled:
+            return "EOT(disabled)"
 
         transforms = []
 
@@ -236,7 +388,13 @@ class EOT:
         if self.contrast_enabled:
             transforms.append("contrast")
 
+        if self.noise_enabled:
+            transforms.append("noise")
+
+        if self.blur_enabled:
+            transforms.append("blur")
+
         if len(transforms) == 0:
-            return "EOT(disabled)"
+            return "EOT(no transforms enabled)"
 
         return f"EOT({', '.join(transforms)})"
