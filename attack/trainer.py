@@ -224,11 +224,21 @@ class PatchTrainer:
             self.patch()
         )
 
+        # -------------------------------------------------
+        # Loss Weights
+        # -------------------------------------------------
+
+        loss_cfg = self.cfg["loss"]
+
         loss = (
-            self.cfg["loss"]["suppression_weight"] * suppression_loss
-            + self.cfg["loss"]["tv_weight"] * tv_loss
-            + self.cfg["loss"]["nps_weight"] * nps_loss
+            loss_cfg["suppression_weight"] * suppression_loss
+            + loss_cfg["tv_weight"] * tv_loss
+            + loss_cfg["nps_weight"] * nps_loss
         )
+
+        # -------------------------------------------------
+        # Logging
+        # -------------------------------------------------
 
         print()
 
@@ -249,6 +259,23 @@ class PatchTrainer:
         )
 
         print()
+
+        print("Loss Weights")
+
+        print(
+            f"Suppression : {loss_cfg['suppression_weight']}"
+        )
+
+        print(
+            f"TV          : {loss_cfg['tv_weight']}"
+        )
+
+        print(
+            f"NPS         : {loss_cfg['nps_weight']}"
+        )
+
+        print()
+
         print(
             f"Mean Target Confidence : {target_scores.mean().item():.6f}"
         )
@@ -261,19 +288,36 @@ class PatchTrainer:
             f"Min Target Confidence  : {target_scores.min().item():.6f}"
         )
 
+        # -------------------------------------------------
+        # Backpropagation
+        # -------------------------------------------------
+
         self.optimizer.zero_grad()
 
         loss.backward()
 
         print()
-        print("Gradient Exists :", self.patch.patch.grad is not None)
+
+        print(
+            "Gradient Exists :",
+            self.patch.patch.grad is not None,
+        )
 
         if self.patch.patch.grad is not None:
-            print("Gradient Shape :", self.patch.patch.grad.shape)
+
+            print(
+                "Gradient Shape :",
+                self.patch.patch.grad.shape,
+            )
 
         self.optimizer.step()
 
+        # -------------------------------------------------
+        # Clamp Patch
+        # -------------------------------------------------
+
         with torch.no_grad():
+
             self.patch.patch.clamp_(
                 self.cfg["patch"]["clamp_min"],
                 self.cfg["patch"]["clamp_max"],
