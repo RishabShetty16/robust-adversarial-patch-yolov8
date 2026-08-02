@@ -74,7 +74,7 @@ def get_patch_position(
         x = (image_width - patch_size) // 2
 
         y = (image_height - patch_size) // 2
-
+        
     # -------------------------------------------------
     # Person Placement
     # -------------------------------------------------
@@ -91,12 +91,94 @@ def get_patch_position(
 
             x1, y1, x2, y2 = person_box
 
-            center_x = int((x1 + x2) / 2)
-            center_y = int((y1 + y2) / 2)
+            anchor = placement_cfg.get(
+                "anchor",
+                "center",
+            )
+
+            # -------------------------------------
+            # Center
+            # -------------------------------------
+
+            if anchor == "center":
+
+                center_x = int((x1 + x2) / 2)
+                center_y = int((y1 + y2) / 2)
+
+            # -------------------------------------
+            # Torso
+            # -------------------------------------
+
+            elif anchor == "torso":
+
+                center_x = int((x1 + x2) / 2)
+
+                person_height = y2 - y1
+
+                center_y = int(
+                    y1 + person_height * 0.40
+                )
+
+            # -------------------------------------
+            # Head
+            # -------------------------------------
+
+            elif anchor == "head":
+
+                center_x = int((x1 + x2) / 2)
+
+                person_height = y2 - y1
+
+                center_y = int(
+                    y1 + person_height * 0.20
+                )
+
+            # -------------------------------------
+            # Feet
+            # -------------------------------------
+
+            elif anchor == "feet":
+
+                center_x = int((x1 + x2) / 2)
+
+                person_height = y2 - y1
+
+                center_y = int(
+                    y1 + person_height * 0.80
+                )
+
+            # -------------------------------------
+            # Random Inside Person
+            # -------------------------------------
+
+            elif anchor == "random":
+
+                center_x = random.randint(
+                    int(x1),
+                    int(x2),
+                )
+
+                center_y = random.randint(
+                    int(y1),
+                    int(y2),
+                )
+
+            # -------------------------------------
+            # Unsupported Anchor
+            # -------------------------------------
+
+            else:
+
+                raise ValueError(
+                    f"Unknown anchor: {anchor}"
+                )
+
+            # -------------------------------------
+            # Convert Center -> Top Left
+            # -------------------------------------
 
             x = center_x - patch_size // 2
             y = center_y - patch_size // 2
-
     # -------------------------------------------------
     # Unsupported Mode
     # -------------------------------------------------

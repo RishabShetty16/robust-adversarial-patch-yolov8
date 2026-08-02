@@ -46,6 +46,9 @@ loss:
 
 placement:
   mode: person
+
+  anchor: random
+
   x: 100
   y: 100
 
