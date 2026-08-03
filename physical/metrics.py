@@ -30,6 +30,10 @@ class PhysicalMetrics:
 
     def reset(self):
 
+        # ---------------------------------------------
+        # General Statistics
+        # ---------------------------------------------
+
         self.frames = 0
 
         self.total_fps = 0.0
@@ -40,13 +44,27 @@ class PhysicalMetrics:
 
         self.min_objects = float("inf")
 
+        # ---------------------------------------------
+        # Person Statistics
+        # ---------------------------------------------
+
+        self.total_persons = 0
+
+        self.max_persons = 0
+
+        self.min_persons = float("inf")
+
+        # ---------------------------------------------
+        # Person Confidence
+        # ---------------------------------------------
+
         self.total_person_confidence = 0.0
 
         self.max_person_confidence = 0.0
 
         self.min_person_confidence = float("inf")
 
-        self.person_frames = 0
+        self.person_detections = 0
 
     # -------------------------------------------------
     # Update Statistics
@@ -82,16 +100,23 @@ class PhysicalMetrics:
         )
 
         # ---------------------------------------------
-        # Person Confidence Statistics
+        # Person Statistics
         # ---------------------------------------------
 
+        person_count = 0
+
         for box in boxes:
+
+            if int(box.cls) != 0:
+                continue
+
+            person_count += 1
 
             confidence = float(box.conf)
 
             self.total_person_confidence += confidence
 
-            self.person_frames += 1
+            self.person_detections += 1
 
             self.max_person_confidence = max(
                 self.max_person_confidence,
@@ -103,7 +128,19 @@ class PhysicalMetrics:
                 confidence,
             )
 
-        # -------------------------------------------------
+        self.total_persons += person_count
+
+        self.max_persons = max(
+            self.max_persons,
+            person_count,
+        )
+
+        self.min_persons = min(
+            self.min_persons,
+            person_count,
+        )
+
+    # -------------------------------------------------
     # Summary
     # -------------------------------------------------
 
@@ -115,14 +152,29 @@ class PhysicalMetrics:
         if self.frames == 0:
 
             return {
+
                 "frames": 0,
+
                 "average_fps": 0.0,
+
                 "average_objects": 0.0,
+
                 "max_objects": 0,
+
                 "min_objects": 0,
+
+                "average_persons": 0.0,
+
+                "max_persons": 0,
+
+                "min_persons": 0,
+
                 "average_person_confidence": 0.0,
+
                 "max_person_confidence": 0.0,
+
                 "min_person_confidence": 0.0,
+
             }
 
         average_fps = (
@@ -135,11 +187,16 @@ class PhysicalMetrics:
             / self.frames
         )
 
-        if self.person_frames > 0:
+        average_persons = (
+            self.total_persons
+            / self.frames
+        )
+
+        if self.person_detections > 0:
 
             average_person_confidence = (
                 self.total_person_confidence
-                / self.person_frames
+                / self.person_detections
             )
 
             min_person_confidence = (
@@ -149,12 +206,18 @@ class PhysicalMetrics:
         else:
 
             average_person_confidence = 0.0
+
             min_person_confidence = 0.0
 
         if self.min_objects == float("inf"):
             min_objects = 0
         else:
             min_objects = self.min_objects
+
+        if self.min_persons == float("inf"):
+            min_persons = 0
+        else:
+            min_persons = self.min_persons
 
         return {
 
@@ -167,6 +230,12 @@ class PhysicalMetrics:
             "max_objects": self.max_objects,
 
             "min_objects": min_objects,
+
+            "average_persons": average_persons,
+
+            "max_persons": self.max_persons,
+
+            "min_persons": min_persons,
 
             "average_person_confidence": average_person_confidence,
 

@@ -198,24 +198,42 @@ def main():
         print("=" * 60)
 
         print(
-            f"Frames Processed          : {summary['frames']}"
+            f"Frames Processed           : {summary['frames']}"
         )
 
         print(
-            f"Average FPS              : {summary['average_fps']:.2f}"
+            f"Average FPS               : {summary['average_fps']:.2f}"
+        )
+
+        print()
+
+        print(
+            f"Average Objects           : {summary['average_objects']:.2f}"
         )
 
         print(
-            f"Average Objects          : {summary['average_objects']:.2f}"
+            f"Maximum Objects           : {summary['max_objects']}"
         )
 
         print(
-            f"Maximum Objects          : {summary['max_objects']}"
+            f"Minimum Objects           : {summary['min_objects']}"
+        )
+
+        print()
+
+        print(
+            f"Average Persons           : {summary['average_persons']:.2f}"
         )
 
         print(
-            f"Minimum Objects          : {summary['min_objects']}"
+            f"Maximum Persons           : {summary['max_persons']}"
         )
+
+        print(
+            f"Minimum Persons           : {summary['min_persons']}"
+        )
+
+        print()
 
         print(
             "Average Person Confidence : "
@@ -233,6 +251,7 @@ def main():
         )
 
         print("=" * 60)
+
         webcam.release()
 
         cv2.destroyAllWindows()
@@ -240,8 +259,6 @@ def main():
         print("=" * 60)
         print("Physical Attack Demo Closed")
         print("=" * 60)
-
-
 # ==========================================================
 # Entry Point
 # ==========================================================
