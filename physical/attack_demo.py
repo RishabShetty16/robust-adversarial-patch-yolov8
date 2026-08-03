@@ -27,6 +27,7 @@ from physical.webcam import Webcam
 
 from physical.metrics import PhysicalMetrics
 from physical.export import PhysicalExporter
+from defense.saliency_defense import SaliencyDefense
 
 # ==========================================================
 # Main
@@ -75,6 +76,7 @@ def main():
     display.load()
     metrics = PhysicalMetrics()
     exporter = PhysicalExporter()
+    defense = SaliencyDefense()
 
     print("✓ Trained Patch Loaded")
 
@@ -142,6 +144,10 @@ def main():
 
             annotated_frame = results[0].plot()
 
+            protected_frame = defense.overlay(
+                annotated_frame
+            )
+
             num_objects = len(
                 results[0].boxes
             )
@@ -175,8 +181,8 @@ def main():
             # ---------------------------------------------
 
             cv2.imshow(
-                "Physical Attack Demo",
-                annotated_frame,
+                "YOLO + Defense",
+                protected_frame,
             )
 
             cv2.imshow(
