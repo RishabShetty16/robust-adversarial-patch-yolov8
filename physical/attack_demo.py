@@ -25,6 +25,7 @@ from attack.detector import YOLODetector
 from physical.display import PatchDisplay
 from physical.webcam import Webcam
 
+from physical.metrics import PhysicalMetrics
 
 # ==========================================================
 # Main
@@ -71,6 +72,7 @@ def main():
     display = PatchDisplay()
 
     display.load()
+    metrics = PhysicalMetrics()
 
     print("✓ Trained Patch Loaded")
 
@@ -131,6 +133,10 @@ def main():
             # ---------------------------------------------
 
             results = detector.predict(frame)
+            metrics.update(
+                results,
+                fps,
+            )
 
             annotated_frame = results[0].plot()
 
@@ -183,7 +189,50 @@ def main():
                 break
 
     finally:
+        summary = metrics.summary()
 
+        print()
+
+        print("=" * 60)
+        print("Physical Evaluation Summary")
+        print("=" * 60)
+
+        print(
+            f"Frames Processed          : {summary['frames']}"
+        )
+
+        print(
+            f"Average FPS              : {summary['average_fps']:.2f}"
+        )
+
+        print(
+            f"Average Objects          : {summary['average_objects']:.2f}"
+        )
+
+        print(
+            f"Maximum Objects          : {summary['max_objects']}"
+        )
+
+        print(
+            f"Minimum Objects          : {summary['min_objects']}"
+        )
+
+        print(
+            "Average Person Confidence : "
+            f"{summary['average_person_confidence']:.4f}"
+        )
+
+        print(
+            "Maximum Person Confidence : "
+            f"{summary['max_person_confidence']:.4f}"
+        )
+
+        print(
+            "Minimum Person Confidence : "
+            f"{summary['min_person_confidence']:.4f}"
+        )
+
+        print("=" * 60)
         webcam.release()
 
         cv2.destroyAllWindows()
