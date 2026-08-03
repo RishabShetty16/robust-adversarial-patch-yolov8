@@ -26,6 +26,7 @@ from physical.display import PatchDisplay
 from physical.webcam import Webcam
 
 from physical.metrics import PhysicalMetrics
+from physical.export import PhysicalExporter
 
 # ==========================================================
 # Main
@@ -73,6 +74,7 @@ def main():
 
     display.load()
     metrics = PhysicalMetrics()
+    exporter = PhysicalExporter()
 
     print("✓ Trained Patch Loaded")
 
@@ -190,6 +192,7 @@ def main():
 
     finally:
         summary = metrics.summary()
+        exporter.export(summary)
 
         print()
 
